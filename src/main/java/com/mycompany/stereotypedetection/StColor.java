@@ -60,7 +60,7 @@ public class StColor {
      * @return Array of colors (sample from the input image)
      * @throws IOException
      */
-    private List<Color> getSample(String ImageName) throws IOException {
+    public List<Color> getSample(String ImageName) throws IOException {
         // open image
         File imgPath = new File(ImageName);
         BufferedImage bufferedImage = ImageIO.read(imgPath);

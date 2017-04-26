@@ -16,6 +16,6 @@ public class Test {
 //        Double[] st = stColor.getColorSt("http://www.ufal.edu.br");
 //        System.out.println("[" + st[0] + "," + st[1] + "]");
 
-        new FaceRecognition().getImages("http://www.toysrus.com/product/index.jsp?productId=86170506&ab=TRU:tfamily_rr:Recommended%20for%20You:1");
+        new FaceRecognition().getImages("https://www.walmart.com.br/bebedouro-cadence-acqua-plus-mesa-20-litros-quente-e-frio-preto-127v/3430834/pr");
     }
 }

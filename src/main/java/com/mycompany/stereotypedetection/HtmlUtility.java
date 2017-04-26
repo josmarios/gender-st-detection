@@ -17,7 +17,13 @@ import org.jsoup.nodes.Document;
  */
 public class HtmlUtility {
 
-    private String getPage(String url) {
+    /**
+     * Gets html content from a given page
+     *
+     * @param url Page URL
+     * @return
+     */
+    public String getPage(String url) {
         Document page = null;
         try {
             page = Jsoup.connect(url).get();
@@ -26,5 +32,16 @@ public class HtmlUtility {
         }
 
         return page.toString();
+    }
+
+    public Document getPageDocument(String url) {
+        Document page = null;
+        try {
+            page = Jsoup.connect(url).get();
+        } catch (IOException ex) {
+            Logger.getLogger(StColor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return page;
     }
 }

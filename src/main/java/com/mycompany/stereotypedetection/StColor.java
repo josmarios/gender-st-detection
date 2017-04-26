@@ -53,6 +53,13 @@ public class StColor {
         }
     }
 
+    /**
+     * Get a sample of colors from a given image
+     *
+     * @param ImageName Image path
+     * @return Array of colors (sample from the input image)
+     * @throws IOException
+     */
     private List<Color> getSample(String ImageName) throws IOException {
         // open image
         File imgPath = new File(ImageName);
@@ -77,6 +84,13 @@ public class StColor {
         return (Math.abs(Math.abs(a - b) - max)) / max;
     }
 
+    /**
+     * Gets the similarity between two given colors
+     *
+     * @param a Color A
+     * @param b Color B
+     * @return Score ranging from 0.0 to 1.0
+     */
     private double colorSimilarity(Color a, Color b) {
         double sim = 0.0;
 
@@ -93,6 +107,13 @@ public class StColor {
         return sim;
     }
 
+    /**
+     * Similarity between two vectors
+     *
+     * @param vectorA
+     * @param vectorB
+     * @return Similarity ranging from 0.0 to 1.0
+     */
     public double cosineSimilarity(double[] vectorA, double[] vectorB) {
         double dotProduct = 0.0;
         double normA = 0.0;
@@ -138,6 +159,12 @@ public class StColor {
         return model;
     }
 
+    /**
+     * Stereotype estimation based on colors
+     *
+     * @param url URL to a Web Page
+     * @return Score for each stereotype [st-female, st-male]
+     */
     public Double[] getColorSt(String url) {
         try {
             String filename = UUID.randomUUID().toString();

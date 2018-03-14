@@ -3,10 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.stereotypedetection;
+package br.com.josmario.stdetection;
 
 import it.grabz.grabzit.GrabzItClient;
 import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -19,13 +23,19 @@ import java.util.UUID;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.util.Pair;
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 /**
  *
  * @author josmario
  */
 public class StColor {
+
+    private Integer[][] SAMPLE;
 
     private final int SAMPLE_SIZE = 500;
     private final Color[] ST_COLORS = {
@@ -42,6 +52,17 @@ public class StColor {
         new Color(50, 90, 255),
         new Color(0, 90, 255)
     };
+
+    public StColor() {
+        SAMPLE = new Integer[800][600];
+
+        for (int i = 0; i < 800; i++) {
+            for (int j = 0; j < 600; j++) {
+                SAMPLE[i][j] = 0;
+            }
+        }
+
+    }
 
     private void saveImage(String sourceUrl, String filepath) {
         try {
@@ -73,10 +94,16 @@ public class StColor {
         for (int i = 0; i < SAMPLE_SIZE; i++) {
             Color c = Color.BLACK;
             while (c == Color.BLACK || c == Color.WHITE) {
-                c = new Color(bufferedImage.getRGB((int) (Math.random() * w), (int) (Math.random() * h)));
+                Integer randW = (int) (Math.random() * w);
+                Integer randH = (int) (Math.random() * h);
+                c = new Color(bufferedImage.getRGB(randW, randH));
+                this.SAMPLE[randW][randH] = 1;
+                System.out.println("(" + randW + "," + randH + ")");
             }
             output.add(c);
         }
+
+        this.printSample(bufferedImage, SAMPLE);
         return output;
     }
 
@@ -201,6 +228,34 @@ public class StColor {
         return null;
     }
 
-    private void printSample(BufferedImage bi, List<Integer> dots) {
+    public void printSample(BufferedImage bufferedImage, Integer[][] dots) {
+
+        Graphics graphics = bufferedImage.getGraphics();
+
+        for (int i = 0; i < 800; i++) {
+            for (int j = 0; j < 600; j++) {
+                if (SAMPLE[i][j] == 1) {
+                    graphics.setColor(Color.red);
+                    graphics.fillOval(i, j, 3, 3);
+                }
+            }
+        }
+
+        graphics.dispose();
+
+        BufferedImage resized = new BufferedImage(800, 600, bufferedImage.getType());
+        Graphics2D g = resized.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(bufferedImage, 0, 0, 800, 600, 0, 0, bufferedImage.getWidth(),
+                bufferedImage.getHeight(), null);
+        g.dispose();
+
+        JFrame frame = new JFrame();
+        frame.getContentPane().setLayout(new FlowLayout());
+        frame.getContentPane().add(new JLabel(new ImageIcon(resized)));
+        frame.pack();
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }

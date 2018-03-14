@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mycompany.stereotypedetection;
+package br.com.josmario.stdetection;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

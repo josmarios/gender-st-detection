@@ -54,10 +54,10 @@ public class StColor {
     };
 
     public StColor() {
-        SAMPLE = new Integer[800][600];
+        SAMPLE = new Integer[192][153];
 
-        for (int i = 0; i < 800; i++) {
-            for (int j = 0; j < 600; j++) {
+        for (int i = 0; i < 192; i++) {
+            for (int j = 0; j < 153; j++) {
                 SAMPLE[i][j] = 0;
             }
         }
@@ -66,7 +66,7 @@ public class StColor {
 
     private void saveImage(String sourceUrl, String filepath) {
         try {
-            GrabzItClient grabzIt = new GrabzItClient("MThmZDcxMWIzYmRkNDU1MGI0YzQ4YjM1ODRjNWEwMWE=", "GFc/P2Y/P3k/aT8/P3E/P1tMQj8/PD8/D3c/NVpjPxI=");
+            GrabzItClient grabzIt = new GrabzItClient("ZWYxZWQxYTA4NWU2NDdhYjk4NDI5ODYwY2VlYTQyMGM=", "PzM/DQ0/RF4/P3g/Sjg/Oz8CPD8/VE8jQW4/dHkJLHc=");
             grabzIt.URLToImage(sourceUrl);
             grabzIt.SaveTo(filepath);
         } catch (Exception ex) {
@@ -232,11 +232,11 @@ public class StColor {
 
         Graphics graphics = bufferedImage.getGraphics();
 
-        for (int i = 0; i < 800; i++) {
-            for (int j = 0; j < 600; j++) {
+        for (int i = 0; i < 192; i++) {
+            for (int j = 0; j < 153; j++) {
                 if (SAMPLE[i][j] == 1) {
                     graphics.setColor(Color.red);
-                    graphics.fillOval(i, j, 3, 3);
+                    graphics.fillOval(i, j, 2, 2);
                 }
             }
         }

@@ -15,7 +15,7 @@ public class Test {
 
     public static void main(String[] args) {
         StColor stColor = new StColor();
-        Double[] st = stColor.getColorSt("www.ufal.edu.br/");   
+        Double[] st = stColor.getColorSt("http://www.girlsgogames.com/");   
 
         System.out.println("[" + st[0] + "," + st[1] + "]");
 

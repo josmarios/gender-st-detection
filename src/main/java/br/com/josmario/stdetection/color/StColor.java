@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection;
+package br.com.josmario.stdetection.color;
 
 import it.grabz.grabzit.GrabzItClient;
 import java.awt.Color;
@@ -222,7 +222,7 @@ public class StColor {
             return scores;
 
         } catch (IOException ex) {
-            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ColorSniffer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;

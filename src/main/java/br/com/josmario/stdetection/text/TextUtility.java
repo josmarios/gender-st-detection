@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection;
+package br.com.josmario.stdetection.text;
 
+import br.com.josmario.stdetection.data.Database;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +14,17 @@ import java.util.Map;
  * @author josmario
  */
 public class TextUtility {
+
+    public static void main(String[] args) {
+        String input = args[0];
+        String output = args[1];
+
+        Database.getInstance().loadUrls(input);
+
+        for (String url : Database.getInstance().getUrls()) {
+            System.out.println(HtmlUtility.getInstance().getPlainText(url));
+        }
+    }
 
     public Map<String, Integer> getWordFrequency(String text) {
         Map<String, Integer> totals = new HashMap<>();

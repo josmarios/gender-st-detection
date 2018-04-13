@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection;
+package br.com.josmario.stdetection.face;
 
+import br.com.josmario.stdetection.text.HtmlUtility;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class FaceRecognition {
      */
     public void getImages(String pageUrl) {
 
-        Document content = new HtmlUtility().getPageDocument(pageUrl);
+        Document content = HtmlUtility.getInstance().getPageDocument(pageUrl);
         Elements images = content.select("img");
         for (Element element : images) {
 

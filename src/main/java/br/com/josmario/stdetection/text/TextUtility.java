@@ -7,6 +7,7 @@ package br.com.josmario.stdetection.text;
 
 import br.com.josmario.stdetection.data.Database;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,31 +16,66 @@ import java.util.Map;
  */
 public class TextUtility {
 
+    private static TextUtility instance;
+
+    private TextUtility() {
+    }
+
+    public static TextUtility getInstance() {
+        if (instance == null) {
+            instance = new TextUtility();
+        }
+        return instance;
+    }
+
     public static void main(String[] args) {
-        String input = args[0];
-        String output = args[1];
+//        String input = args[0];
+//        String output = args[1];
+//
+//        Database.getInstance().loadUrls(input);
+//
+//        for (String url : Database.getInstance().getUrls()) {
+//            System.out.println(HtmlUtility.getInstance().getPlainText(url));
+//        }
 
-        Database.getInstance().loadUrls(input);
+        String source = "https://www.google.com";
 
-        for (String url : Database.getInstance().getUrls()) {
-            System.out.println(HtmlUtility.getInstance().getPlainText(url));
+        Map<String, Double> freqs = TextUtility.getInstance().getWordFrequency(HtmlUtility.getInstance().getWordList(source));
+        for (String s : freqs.keySet()) {
+            System.out.println(s + ":" + freqs.get(s) + "\n");
         }
     }
 
-    public Map<String, Integer> getWordFrequency(String text) {
-        Map<String, Integer> totals = new HashMap<>();
+    private Map<String, Double> normalize(Map<String, Double> values) {
+        Map<String, Double> result = new HashMap<>();
 
-        for (String word : text.split(" ")) {
+        Double max = 0.0;
+        for (Double current : values.values()) {
+            max = current > max ? current : max;
+        }
+
+        for (String w : values.keySet()) {
+            double normal = values.get(w) / max;
+            result.put(w, normal);
+        }
+
+        return result;
+    }
+
+    public Map<String, Double> getWordFrequency(List<String> text) {
+        Map<String, Double> totals = new HashMap<>();
+
+        for (String word : text) {
             if (totals.containsKey(word)) {
-                Integer temp = totals.get(word);
+                Double temp = totals.get(word);
                 totals.remove(word);
                 totals.put(word, ++temp);
             } else {
-                totals.put(word, 1);
+                totals.put(word, 1.0);
             }
         }
 
-        return totals;
+        return normalize(totals);
     }
 
     public Double getTextSimilarity(String baseText, String sampleText) {

@@ -10,10 +10,13 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.RenderingHints;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,11 +36,15 @@ import javax.swing.JLabel;
  *
  * @author josmario
  */
-public class StColor {
+public class ColorUtility {
+
+    private static ColorUtility instance;
 
     private Integer[][] SAMPLE;
+    private Integer WIDTH;
+    private Integer HEIGHT;
 
-    private final int SAMPLE_SIZE = 500;
+    private final int SAMPLE_SIZE = 1000;
     private final Color[] ST_COLORS = {
         //female
         new Color(250, 70, 130),
@@ -53,24 +60,104 @@ public class StColor {
         new Color(0, 90, 255)
     };
 
-    public StColor() {
-        SAMPLE = new Integer[192][153];
-
-        for (int i = 0; i < 192; i++) {
-            for (int j = 0; j < 153; j++) {
-                SAMPLE[i][j] = 0;
-            }
-        }
+    private ColorUtility() {
 
     }
 
-    private void saveImage(String sourceUrl, String filepath) {
+    public static ColorUtility getInstance() {
+        if (instance == null) {
+            instance = new ColorUtility();
+        }
+        return instance;
+    }
+
+    private void initSample(int w, int h) {
+        WIDTH = w;
+        HEIGHT = h;
+        SAMPLE = new Integer[w][h];
+
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                SAMPLE[i][j] = 0;
+            }
+        }
+    }
+
+//    private void saveImage(String sourceUrl, String filepath) {
+//        try {
+//            GrabzItClient grabzIt = new GrabzItClient("ZWYxZWQxYTA4NWU2NDdhYjk4NDI5ODYwY2VlYTQyMGM=", "PzM/DQ0/RF4/P3g/Sjg/Oz8CPD8/VE8jQW4/dHkJLHc=");
+//            grabzIt.URLToImage(sourceUrl);
+//            grabzIt.SaveTo(filepath);
+//        } catch (Exception ex) {
+//            Logger.getLogger(StColor.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
+    public void saveImage(String sourceUrl, String filepath) {
         try {
-            GrabzItClient grabzIt = new GrabzItClient("ZWYxZWQxYTA4NWU2NDdhYjk4NDI5ODYwY2VlYTQyMGM=", "PzM/DQ0/RF4/P3g/Sjg/Oz8CPD8/VE8jQW4/dHkJLHc=");
-            grabzIt.URLToImage(sourceUrl);
-            grabzIt.SaveTo(filepath);
-        } catch (Exception ex) {
-            Logger.getLogger(StColor.class.getName()).log(Level.SEVERE, null, ex);
+            Process p = Runtime.getRuntime().exec("firefox -screenshot " + filepath + " " + sourceUrl);
+            p.waitFor();
+        } catch (IOException ex) {
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void saveSample(String source, String outImage, String outCsv) {
+        try {
+
+            List<Color> colors = new ArrayList<>();
+            BufferedImage bufferedImage = ImageIO.read(new File(source));
+
+            int w = bufferedImage.getWidth();
+            int h = bufferedImage.getHeight();
+
+            this.initSample(w, h);
+
+            for (int i = 0; i < SAMPLE_SIZE; i++) {
+
+                Integer randW = (int) (Math.random() * w);
+                Integer randH = (int) (Math.random() * h);
+
+                Color c = new Color(bufferedImage.getRGB(randW, randH));
+
+                if (c == Color.BLACK || c == Color.WHITE) {
+                    this.SAMPLE[randW][randH] = 0;
+
+                } else {
+                    this.SAMPLE[randW][randH] = 1;
+                    colors.add(c);
+                }
+            }
+
+            Graphics graphics = bufferedImage.getGraphics();
+
+            for (int i = 0; i < w; i++) {
+                for (int j = 0; j < h; j++) {
+                    if (SAMPLE[i][j] == 1) {
+                        graphics.setColor(Color.red);
+                        graphics.fillOval(i, j, 5, 5);
+                    }
+                }
+            }
+
+            ImageIO.write(bufferedImage, "PNG", new File(outImage));
+
+            //saves colors to csv
+            FileWriter fw = new FileWriter(outCsv);
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            String line = "\"color\"\n";
+            bw.append(line);
+            for (Color color : colors) {
+                line = "\"(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")\"\n";
+                bw.append(line);
+            }
+            bw.close();
+            fw.close();
+
+        } catch (IOException ex) {
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -196,6 +283,7 @@ public class StColor {
         try {
             String filename = UUID.randomUUID().toString();
             String file = "/home/josmario/temp/page-imgs/" + filename + ".jpg";
+//            this.saveImage(url, file);
             this.saveImage(url, file);
 
             List<Color> sample = this.getSample(file);
@@ -222,7 +310,8 @@ public class StColor {
             return scores;
 
         } catch (IOException ex) {
-            Logger.getLogger(ColorSniffer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ColorSniffer.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;
@@ -232,8 +321,8 @@ public class StColor {
 
         Graphics graphics = bufferedImage.getGraphics();
 
-        for (int i = 0; i < 192; i++) {
-            for (int j = 0; j < 153; j++) {
+        for (int i = 0; i < WIDTH; i++) {
+            for (int j = 0; j < HEIGHT; j++) {
                 if (SAMPLE[i][j] == 1) {
                     graphics.setColor(Color.red);
                     graphics.fillOval(i, j, 2, 2);
@@ -243,19 +332,19 @@ public class StColor {
 
         graphics.dispose();
 
-        BufferedImage resized = new BufferedImage(800, 600, bufferedImage.getType());
-        Graphics2D g = resized.createGraphics();
-        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.drawImage(bufferedImage, 0, 0, 800, 600, 0, 0, bufferedImage.getWidth(),
-                bufferedImage.getHeight(), null);
-        g.dispose();
-
-        JFrame frame = new JFrame();
-        frame.getContentPane().setLayout(new FlowLayout());
-        frame.getContentPane().add(new JLabel(new ImageIcon(resized)));
-        frame.pack();
-        frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        BufferedImage resized = new BufferedImage(800, 600, bufferedImage.getType());
+//        Graphics2D g = resized.createGraphics();
+//        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+//                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+//        g.drawImage(bufferedImage, 0, 0, 800, 600, 0, 0, bufferedImage.getWidth(),
+//                bufferedImage.getHeight(), null);
+//        g.dispose();
+//
+//        JFrame frame = new JFrame();
+//        frame.getContentPane().setLayout(new FlowLayout());
+//        frame.getContentPane().add(new JLabel(new ImageIcon(resized)));
+//        frame.pack();
+//        frame.setVisible(true);
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }

@@ -5,7 +5,7 @@
  */
 package br.com.josmario.stdetection.text;
 
-import br.com.josmario.stdetection.color.StColor;
+import br.com.josmario.stdetection.color.ColorUtility;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +43,7 @@ public class HtmlUtility {
         try {
             page = Jsoup.connect(url).get();
         } catch (IOException ex) {
-            Logger.getLogger(StColor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return page.toString();
@@ -54,7 +54,7 @@ public class HtmlUtility {
         try {
             page = Jsoup.connect(url).get();
         } catch (IOException ex) {
-            Logger.getLogger(StColor.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return page;

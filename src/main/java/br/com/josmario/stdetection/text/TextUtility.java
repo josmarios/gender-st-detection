@@ -6,6 +6,10 @@
 package br.com.josmario.stdetection.text;
 
 import br.com.josmario.stdetection.data.Database;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,6 +100,24 @@ public class TextUtility {
         }
 
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    }
+
+    public void storeFrequency(String url, String target) {
+
+        Map<String, Double> freq = this.getWordFrequency(HtmlUtility.getInstance().getWordList(url));
+        File out = new File(target);
+
+        try {
+
+            FileWriter fw = new FileWriter(out);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.append("\"term\", \"relative_frequency\"");
+            for (String term : freq.keySet()) {
+                String line = "\"" + term + "\", \"" + freq.get(term) + "\"";
+                bw.append(line);
+            }
+        } catch (IOException e) {
+        }
     }
 
 }

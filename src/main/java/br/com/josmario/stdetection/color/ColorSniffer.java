@@ -31,7 +31,8 @@ public class ColorSniffer {
     }
 
     public static void main(String[] args) {
-        StColor stColor = new StColor();
+        ColorUtility stColor = ColorUtility.getInstance();
+
         Double[] st = stColor.getColorSt("http://www.girlsgogames.com/");
 
         System.out.println("[" + st[0] + "," + st[1] + "]");

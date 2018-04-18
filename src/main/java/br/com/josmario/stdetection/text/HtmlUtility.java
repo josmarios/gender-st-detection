@@ -7,6 +7,8 @@ package br.com.josmario.stdetection.text;
 
 import br.com.josmario.stdetection.color.StColor;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
@@ -58,7 +60,21 @@ public class HtmlUtility {
         return page;
     }
 
-    public String getPlainText(String url) {
-        return this.getPage(url).replaceAll("\\<[^>]*>", "");
+    public List<String> getWordList(String url) {
+        List<String> result = new ArrayList<>();
+
+        String temp = this.getPage(url).replaceAll("</body>[\\w|\\W]+", "");
+        temp = temp.replaceAll("[\\w|\\W]+<body>", "");
+        temp = temp.replaceAll("\\s*\\{.*?\\}", "");
+        temp = temp.replaceAll("<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>", "");
+        temp = temp.replaceAll("\\<[^>]*>", "");
+        temp = temp.replace("[\\n]+", "[\\s]");
+        temp = temp.replace("\\s\\s", "\\s");
+
+        for (String string : temp.split(" ")) {
+            result.add(string.replace("\\W", ""));
+        }
+
+        return result;
     }
 }

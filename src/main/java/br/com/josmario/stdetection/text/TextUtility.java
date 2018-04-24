@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  *
@@ -51,6 +52,7 @@ public class TextUtility {
     }
 
     private Map<String, Double> normalize(Map<String, Double> values) {
+
         Map<String, Double> result = new HashMap<>();
 
         Double max = 0.0;
@@ -60,6 +62,9 @@ public class TextUtility {
 
         for (String w : values.keySet()) {
             double normal = values.get(w) / max;
+
+            normal = Math.round(normal * 1000000);
+            normal /= 1000000;
             result.put(w, normal);
         }
 
@@ -79,7 +84,10 @@ public class TextUtility {
             }
         }
 
-        return normalize(totals);
+        System.out.println("Normalizing word frequencies...");
+        totals = normalize(totals);
+
+        return totals;
     }
 
     public Double getTextSimilarity(String baseText, String sampleText) {
@@ -104,19 +112,30 @@ public class TextUtility {
 
     public void storeFrequency(String url, String target) {
 
-        Map<String, Double> freq = this.getWordFrequency(HtmlUtility.getInstance().getWordList(url));
-        File out = new File(target);
+        System.out.println("Getting wordlist...");
+        List<String> wordList = HtmlUtility.getInstance().getWordList(url);
 
-        try {
+        if (wordList != null) {
 
-            FileWriter fw = new FileWriter(out);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.append("\"term\", \"relative_frequency\"");
-            for (String term : freq.keySet()) {
-                String line = "\"" + term + "\", \"" + freq.get(term) + "\"";
-                bw.append(line);
+            System.out.println("Calculating word frequencies...");
+            Map<String, Double> freq = this.getWordFrequency(wordList);
+
+            File out = new File(target);
+
+            try {
+
+                FileWriter fw = new FileWriter(out);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.append("\"term\", \"relative_frequency\"\n");
+                for (String term : freq.keySet()) {
+                    String line = "\"" + term + "\", \"" + freq.get(term) + "\"\n";
+                    bw.append(line);
+                }
+            } catch (IOException e) {
             }
-        } catch (IOException e) {
+        } else {
+
+            System.out.println("Couldn't get a valid word list from '" + url + "'. Frequency not stored.");
         }
     }
 

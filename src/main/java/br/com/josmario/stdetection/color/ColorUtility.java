@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -94,11 +95,11 @@ public class ColorUtility {
 //    }
     public void saveImage(String sourceUrl, String filepath) {
         try {
-            Process p = Runtime.getRuntime().exec("firefox -screenshot " + filepath + " " + sourceUrl);
+            Process p = new ProcessBuilder("firefox", "-headless", "-screenshot ", filepath, sourceUrl).start();
+            System.out.println("Waiting for screenshot to proceed...");
             p.waitFor();
-        } catch (IOException ex) {
-            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
+            p.destroyForcibly();
+        } catch (IOException | InterruptedException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

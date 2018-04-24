@@ -1,2 +1,2 @@
-http://www.google.com
-http://www.ufal.edu.br
+https://www.google.com/
+https://www.wikipedia.org/

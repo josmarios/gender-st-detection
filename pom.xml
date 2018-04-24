@@ -35,12 +35,12 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     
-    <build>
+<!--    <build>
         <finalName>st-detection</finalName>
         <plugins>
 
-            <!-- download source code in Eclipse, best practice -->
-<!--            <plugin>
+             download source code in Eclipse, best practice 
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-eclipse-plugin</artifactId>
                 <version></version>
@@ -48,9 +48,9 @@
                     <downloadSources>true</downloadSources>
                     <downloadJavadocs>false</downloadJavadocs>
                 </configuration>
-            </plugin>-->
+            </plugin>
 
-            <!-- Set a compiler level -->
+             Set a compiler level 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -61,17 +61,17 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Assembly Plugin -->
+             Maven Assembly Plugin 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>2.4.1</version>
                 <configuration>
-                    <!-- get all project dependencies -->
+                     get all project dependencies 
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
-                    <!-- MainClass in mainfest make a executable jar -->
+                     MainClass in mainfest make a executable jar 
                     <archive>
                         <manifest>
                             <mainClass>br.com.josmario.stdetection.text.TextUtility</mainClass>
@@ -82,7 +82,7 @@
                 <executions>
                     <execution>
                         <id>make-assembly</id>
-                        <!-- bind to the packaging phase -->
+                         bind to the packaging phase 
                         <phase>package</phase> 
                         <goals>
                             <goal>single</goal>
@@ -92,5 +92,5 @@
             </plugin>
 
         </plugins>
-    </build>
+    </build>-->
 </project>

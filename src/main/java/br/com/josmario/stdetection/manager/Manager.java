@@ -44,12 +44,9 @@ public class Manager {
         // String input = args[0];
         // String output = args[1];
 
-//        Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
-//
-//        for (String url : Database.getInstance().getUrls()) {
-//            System.out.println("url: " + url);
-//        }
-        //Manager.getInstance().generateDictionary();
+        Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
+
+        Manager.getInstance().generateDictionary();
         Manager.getInstance().createDatabase();
     }
 
@@ -88,6 +85,7 @@ public class Manager {
                 String url = data[0];
                 String id = data[1];
 
+                System.out.println("\n========================> [" + url + "] <========================");
                 new File(baseDir + id).mkdirs();
 
                 String frequency = baseDir + id + "/freq.csv";
@@ -95,9 +93,13 @@ public class Manager {
                 String sampleImg = baseDir + id + "/sample.png";
                 String sampleCsv = baseDir + id + "/sample.csv";
 
-                 TextUtility.getInstance().storeFrequency(url, frequency);
+                System.out.println("Storing word frequencies...");
+                TextUtility.getInstance().storeFrequency(url, frequency);
+
+                System.out.println("Saving screenshot...");
                 ColorUtility.getInstance().saveImage(url, screenshot);
-                ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+
+//                ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
             }
 
         } catch (IOException e) {

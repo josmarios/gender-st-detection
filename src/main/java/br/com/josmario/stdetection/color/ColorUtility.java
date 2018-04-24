@@ -45,7 +45,7 @@ public class ColorUtility {
     private Integer WIDTH;
     private Integer HEIGHT;
 
-    private final int SAMPLE_SIZE = 1000;
+    private final int SAMPLE_SIZE = 3000;
     private final Color[] ST_COLORS = {
         //female
         new Color(250, 70, 130),
@@ -97,7 +97,7 @@ public class ColorUtility {
         try {
             Process p = new ProcessBuilder("firefox", "-headless", "-screenshot ", filepath, sourceUrl).start();
             System.out.println("Waiting for screenshot to proceed...");
-            p.waitFor();
+            p.waitFor(10, TimeUnit.SECONDS);
             p.destroyForcibly();
         } catch (IOException | InterruptedException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
@@ -122,7 +122,8 @@ public class ColorUtility {
 
                 Color c = new Color(bufferedImage.getRGB(randW, randH));
 
-                if (c == Color.BLACK || c == Color.WHITE) {
+                int temp = c.getRed() + c.getGreen() + c.getBlue();
+                if (temp == 0 || temp == 765) {
                     this.SAMPLE[randW][randH] = 0;
 
                 } else {

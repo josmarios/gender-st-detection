@@ -14,8 +14,11 @@ import java.awt.Image;
 import java.awt.RenderingHints;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -275,48 +278,62 @@ public class ColorUtility {
         return model;
     }
 
+    private List<Color> readSample(String file) {
+        List<Color> colors = new ArrayList<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(file)));
+            String line = br.readLine();
+            while ((line = br.readLine()) != null) {
+                line = line.replaceAll("(", "").replaceAll(")", "");
+                int red = Integer.valueOf(line.split(",")[0]);
+                int green = Integer.valueOf(line.split(",")[1]);
+                int blue = Integer.valueOf(line.split(",")[2]);
+                colors.add(new Color(red, green, blue));
+                System.out.println("color: " + red + "," + green + "," + blue);
+
+            }
+        } catch (IOException | NumberFormatException ex) {
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return colors;
+    }
+
     /**
      * Stereotype estimation based on colors
      *
      * @param url URL to a Web Page
      * @return Score for each stereotype [st-female, st-male]
      */
-    public Double[] getColorSt(String url) {
-        try {
-            String filename = UUID.randomUUID().toString();
-            String file = "/home/josmario/temp/page-imgs/" + filename + ".jpg";
+    public Double[] getBias(String file) {
+
+//            String filename = UUID.randomUUID().toString();
+//            String file = "/home/josmario/temp/page-imgs/" + filename + ".jpg";
+////            this.saveImage(url, file);
 //            this.saveImage(url, file);
-            this.saveImage(url, file);
+        List<Color> sample = this.readSample(file);
+        Map<Color, Double> stModel = this.computeModel(ST_COLORS, sample);
 
-            List<Color> sample = this.getSample(file);
-            Map<Color, Double> stModel = this.computeModel(ST_COLORS, sample);
+        List<Double> m = new ArrayList<>();
 
-            List<Double> m = new ArrayList<>();
+        stModel.values().stream().forEach((value) -> {
+            m.add(value);
+        });
 
-            stModel.values().stream().forEach((value) -> {
-                m.add(value);
-            });
+        Double mScore = 0.0;
+        Double fScore = 0.0;
 
-            Double mScore = 0.0;
-            Double fScore = 0.0;
-
-            for (int i = 0; i < (m.size() / 2); i++) {
-                fScore += m.get(i);
-            }
-
-            for (int i = (m.size() / 2); i < m.size(); i++) {
-                mScore += m.get(i);
-            }
-
-            Double[] scores = {fScore, mScore};
-            return scores;
-
-        } catch (IOException ex) {
-            Logger.getLogger(ColorSniffer.class
-                    .getName()).log(Level.SEVERE, null, ex);
+        for (int i = 0; i < (m.size() / 2); i++) {
+            fScore += m.get(i);
         }
 
-        return null;
+        for (int i = (m.size() / 2); i < m.size(); i++) {
+            mScore += m.get(i);
+        }
+
+        Double[] scores = {fScore, mScore};
+        return scores;
+
     }
 
     public void printSample(BufferedImage bufferedImage, Integer[][] dots) {

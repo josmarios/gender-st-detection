@@ -33,7 +33,7 @@ public class ColorSniffer {
     public static void main(String[] args) {
         ColorUtility stColor = ColorUtility.getInstance();
 
-        Double[] st = stColor.getColorSt("http://www.girlsgogames.com/");
+        Double[] st = stColor.getBias("http://www.girlsgogames.com/");
 
         System.out.println("[" + st[0] + "," + st[1] + "]");
 

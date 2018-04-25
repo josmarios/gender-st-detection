@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -90,9 +91,47 @@ public class TextUtility {
         return totals;
     }
 
-    public Double getTextSimilarity(String baseText, String sampleText) {
+    public double getBias(Map<String, Double> base, Map<String, Double> sample) {
 
-        Double sim = 0.0;
+        if (base == null || sample == null) {
+            return 0.0;
+        }
+
+        double st = 0.0;
+
+        double total = 0.0;
+        double cummulativeSt = 0.0;
+
+        for (String string : sample.keySet()) {
+            if (base.containsKey(string)) {
+
+                double stStrength = Math.sqrt(base.get(string) * sample.get(string));
+                cummulativeSt += stStrength;
+                total++;
+            }
+        }
+
+        double overallStrength = total != 0 ? cummulativeSt / total : 0.0;
+        double freqScore = getFrequencyScore(base.keySet(), sample.keySet());
+
+        st = Math.sqrt(overallStrength * freqScore);
+
+        return st;
+    }
+
+    private double getFrequencyScore(Set<String> baseText, Set<String> sample) {
+
+        double sim = 0.0;
+        double total = 0.0;
+
+        for (String string : sample) {
+            if (baseText.contains(string)) {
+                total++;
+            }
+        }
+
+        sim = sample.size() > 0 ? total / sample.size() : 0.0;
+        // sim = Math.round(sim * 100000) / 100000D;
 
         return sim;
     }

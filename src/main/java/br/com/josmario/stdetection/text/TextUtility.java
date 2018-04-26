@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +57,18 @@ public class TextUtility {
 
         Map<String, Double> result = new HashMap<>();
 
-        Double max = 0.0;
-        for (Double current : values.values()) {
-            max = current > max ? current : max;
+//        Double max = 0.0;
+//        for (Double current : values.values()) {
+//            max = current >= max ? current : max;
+//        }
+        double total = 0.0;
+
+        for (Double value : values.values()) {
+            total += value;
         }
 
         for (String w : values.keySet()) {
-            double normal = values.get(w) / max;
+            double normal = values.get(w) / total;
 
             normal = Math.round(normal * 1000000);
             normal /= 1000000;
@@ -85,7 +91,6 @@ public class TextUtility {
             }
         }
 
-        System.out.println("Normalizing word frequencies...");
         totals = normalize(totals);
 
         return totals;
@@ -101,22 +106,57 @@ public class TextUtility {
 
         double total = 0.0;
         double cummulativeSt = 0.0;
-
-        for (String string : sample.keySet()) {
-            if (base.containsKey(string)) {
-
-                double stStrength = Math.sqrt(base.get(string) * sample.get(string));
-                cummulativeSt += stStrength;
-                total++;
-            }
-        }
-
-        double overallStrength = total != 0 ? cummulativeSt / total : 0.0;
+//        double totalSt = 0.0;
+//        for (String string : base.keySet()) {
+//            totalSt += base.get(string);
+//
+//        }
+//        for (String string : sample.keySet()) {
+//            if (base.containsKey(string)) {
+//
+//                System.out.println(base.get(string) + "-" + sample.get(string));
+//                double stStrength = Math.sqrt(base.get(string) * sample.get(string));
+//                cummulativeSt += stStrength;
+//                total++;
+//            }
+//        }
+//
+//        double overallStrength = totalSt != 0 ? cummulativeSt / totalSt : 0.0;
         double freqScore = getFrequencyScore(base.keySet(), sample.keySet());
 
-        st = Math.sqrt(overallStrength * freqScore);
+//        st = Math.sqrt(overallStrength * freqScore);
+//        System.out.println("cummulativeSt: " + cummulativeSt);
+//        System.out.println("Totalst: " + totalSt);
+//        System.out.println("overallStrength: " + overallStrength);
+//        System.out.println("freqScore: " + freqScore);
+//        System.out.println("st: " + st);
+        return freqScore;
+    }
 
-        return st;
+    public Double getBias(Map<String, Double> base, String text) {
+        Double[] st = {};
+        List<String> words = new ArrayList<>();
+
+        if (text != null) {
+
+            String temp = text
+                    .replaceAll("[\\n]+", " ")
+                    .replaceAll("[0-9]", "")
+                    .replaceAll("[\\s]+", "0")
+                    .replaceAll("\\W", "");
+
+            for (String string : temp.split("0")) {
+                String s = string.toLowerCase();
+                if (s.length() > 2) {
+                    words.add(s);
+                }
+            }
+
+            Map<String, Double> freqs = this.getWordFrequency(words);
+            return this.getBias(base, freqs);
+        }
+
+        return 0.0;
     }
 
     private double getFrequencyScore(Set<String> baseText, Set<String> sample) {

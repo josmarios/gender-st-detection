@@ -12,6 +12,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -49,15 +51,30 @@ public class Manager {
     }
 
     public static void main(String[] args) {
-        // String input = args[0];
-        // String output = args[1];
+        String input = args[0];
 
+        if (input != null || input == "") {
+            Double[] score = Manager.getInstance().getTextBias(input);
+
+//            System.out.println("Female Bias: " + score[1]);
+//            System.out.println("Male Bias: " + score[0]);
+//            System.out.println("Stereotype Score: " + score[2]);
+            String genderMessage = score[0] > score[1] ? "MALE" : "FEMALE";
+            String neutralMessage = "No";
+            String decision = score[3] != 0 ? genderMessage : neutralMessage;
+
+            System.out.println("Overall Decision: " + decision + " stereotype.");
+
+        } else {
+            System.out.println("Please, provide a valid text file.");
+        }
+
+//        System.out.println("");
 //        Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
 //        Manager.getInstance().generateDictionary();
-        Manager.getInstance().createDatabase();
-
+        //   Manager.getInstance().createDatabase();
 //        Manager.getInstance().calculateBias();
-
+//        TextUtility.getInstance().getBias(base, sample)
     }
 
     public void generateDictionary() {
@@ -104,10 +121,10 @@ public class Manager {
                 String sampleCsv = BASE_DIR + id + "/sample.csv";
 
                 System.out.println("Storing word frequencies...");
-                 TextUtility.getInstance().storeFrequency(url, frequency);
+                TextUtility.getInstance().storeFrequency(url, frequency);
 
                 System.out.println("Saving screenshot...");
-                 ColorUtility.getInstance().saveImage(url, screenshot);
+                ColorUtility.getInstance().saveImage(url, screenshot);
 
                 System.out.println("Saving sample...");
                 ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
@@ -126,16 +143,14 @@ public class Manager {
 
             System.out.println("================> " + dir + " <================");
 
-            Double[] textBias = getTextBias(dir + "/freq.csv");
+            Double[] textBias = getWordListBias(dir + "/freq.csv");
             Double[] colorBias = ColorUtility.getInstance().getBias(dir);
             System.out.println("Text Bias: " + textBias.toString());
             System.out.println("Color Bias: " + colorBias.toString());
-
         }
-
     }
 
-    private Double[] getTextBias(String file) {
+    private Double[] getWordListBias(String file) {
 
         double stScore = 0;
 
@@ -147,19 +162,66 @@ public class Manager {
         Double fScore = TextUtility.getInstance().getBias(stFemale, sample);
         stScore = Math.abs(mScore - fScore);
 
-//        System.out.println("Female Stereotype: " + fScore);
-//        System.out.println("Male Stereotype: " + mScore);
-//        System.out.println("Overall: " + stScore);
-        Double[] st = {mScore, fScore, stScore};
+        Double decision = mScore > fScore ? -1.0 : 1.0;
+
+        decision = stScore < 0.5 ? decision : 0.0;
+
+        Double[] st = {mScore, fScore, stScore, decision};
         return st;
 
+    }
+
+    private Double[] getTextBias(String file) {
+
+        double stScore = 0;
+
+        Map<String, Double> stMale = readData("stMale.csv");
+        Map<String, Double> stFemale = readData("stFemale.csv");
+
+        String text = this.readTextFile(file);
+        Double mScore = TextUtility.getInstance().getBias(stMale, text);
+        Double fScore = TextUtility.getInstance().getBias(stFemale, text);
+        stScore = Math.abs(mScore - fScore);
+
+        Double decision = mScore > fScore ? -1.0 : 1.0;
+
+        decision = stScore < 0.5 ? 0.0 : decision;
+
+        Double[] st = {mScore, fScore, stScore, decision};
+        return st;
+
+    }
+
+    private String readTextFile(String filename) {
+        String text = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(new File(filename)));
+
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                text += line + "\n";
+            }
+
+        } catch (FileNotFoundException ex) {
+            System.out.println("File not found: " + filename);
+        } catch (IOException ex) {
+            System.out.println("Error while reading '" + filename + "'.");
+        }
+        return text;
     }
 
     private Map<String, Double> readData(String filename) {
         Map<String, Double> data = new HashMap<>();
 
+        String file = BASE_DIR + filename;
+
+        if (filename.equals("stFemale.csv") || filename.equals("stMale.csv")) {
+            file = "classes/" + filename;
+        }
+
         try {
-            FileReader fr = new FileReader(new File(BASE_DIR + filename));
+
+            FileReader fr = new FileReader(new File(file));
             BufferedReader br = new BufferedReader(fr);
             String line = br.readLine();
             while ((line = br.readLine()) != null) {

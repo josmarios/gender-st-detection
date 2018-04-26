@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,22 +52,22 @@ public class Manager {
     }
 
     public static void main(String[] args) {
-        String input = args[0];
 
-        if (input != null || input == "") {
+        if (args.length > 0) {
+            String input = args[0];
             Double[] score = Manager.getInstance().getTextBias(input);
-
-//            System.out.println("Female Bias: " + score[1]);
-//            System.out.println("Male Bias: " + score[0]);
-//            System.out.println("Stereotype Score: " + score[2]);
             String genderMessage = score[0] > score[1] ? "MALE" : "FEMALE";
             String neutralMessage = "No";
             String decision = score[3] != 0 ? genderMessage : neutralMessage;
-
             System.out.println("Overall Decision: " + decision + " stereotype.");
-
         } else {
-            System.out.println("Please, provide a valid text file.");
+            // System.out.println("Please, provide a valid text file.");
+
+//            Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
+//            Manager.getInstance().generateDictionary();
+            //    Manager.getInstance().createDatabase();
+            Manager.getInstance().calculateBias();
+//        TextUtility.getInstance().getBias(base, sample)
         }
 
 //        System.out.println("");
@@ -124,10 +125,10 @@ public class Manager {
                 TextUtility.getInstance().storeFrequency(url, frequency);
 
                 System.out.println("Saving screenshot...");
-                ColorUtility.getInstance().saveImage(url, screenshot);
+                //  ColorUtility.getInstance().saveImage(url, screenshot);
 
                 System.out.println("Saving sample...");
-                ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+                //  ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
             }
 
         } catch (IOException e) {
@@ -144,9 +145,9 @@ public class Manager {
             System.out.println("================> " + dir + " <================");
 
             Double[] textBias = getWordListBias(dir + "/freq.csv");
-            Double[] colorBias = ColorUtility.getInstance().getBias(dir);
-            System.out.println("Text Bias: " + textBias.toString());
-            System.out.println("Color Bias: " + colorBias.toString());
+            Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR+ dir + "/screenshot.png");
+            System.out.println("Text Bias: " + Arrays.toString(textBias));
+            System.out.println("Color Bias: " + Arrays.toString(colorBias));
         }
     }
 
@@ -213,30 +214,33 @@ public class Manager {
     private Map<String, Double> readData(String filename) {
         Map<String, Double> data = new HashMap<>();
 
-        String file = BASE_DIR + filename;
-
         if (filename.equals("stFemale.csv") || filename.equals("stMale.csv")) {
-            file = "classes/" + filename;
-        }
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(filename)));
+                String line = br.readLine();
+                while ((line = br.readLine()) != null) {
+                    String word = line.split(",")[0].replaceAll("\"", "");
+                    Double value = Double.valueOf(line.split(",")[1].replaceAll("\"", ""));
+                    data.put(word.toLowerCase(), value);
+                }
 
-        try {
-
-            FileReader fr = new FileReader(new File(file));
-            BufferedReader br = new BufferedReader(fr);
-            String line = br.readLine();
-            while ((line = br.readLine()) != null) {
-
-                String word = line.split(",")[0].replaceAll("\"", "");
-                Double value = Double.valueOf(line.split(",")[1].replaceAll("\"", ""));
-
-                data.put(word.toLowerCase(), value);
-
+            } catch (Exception ex) {
+                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } else {
 
-        } catch (Exception ex) {
-            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            try {
+                BufferedReader br = new BufferedReader(new FileReader(new File(BASE_DIR + filename)));
+                String line = br.readLine();
+                while ((line = br.readLine()) != null) {
+                    String word = line.split(",")[0].replaceAll("\"", "");
+                    Double value = Double.valueOf(line.split(",")[1].replaceAll("\"", ""));
+                    data.put(word.toLowerCase(), value);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-
         return data;
     }
 

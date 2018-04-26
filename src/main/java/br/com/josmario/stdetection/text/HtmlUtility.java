@@ -42,7 +42,7 @@ public class HtmlUtility {
     public String getPage(String url) {
         Document page = null;
         try {
-            page = Jsoup.connect(url).timeout(5000).get();
+            page = Jsoup.connect(url).timeout(10000).get();
         } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
             return null;

@@ -98,10 +98,16 @@ public class ColorUtility {
 //    }
     public void saveImage(String sourceUrl, String filepath) {
         try {
-            Process p = new ProcessBuilder("firefox", "-headless", "-screenshot ", filepath, sourceUrl).start();
-            System.out.println("Waiting for screenshot to proceed...");
+
+            Process p = Runtime.getRuntime().exec("firefox -headless -screenshot " + filepath + " " + sourceUrl);
             p.waitFor(10, TimeUnit.SECONDS);
-            p.destroyForcibly();
+
+            if (p.isAlive()) {
+                p.destroyForcibly();
+            }
+
+            System.out.println("Waiting for screenshot to proceed...");
+
         } catch (IOException | InterruptedException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -158,6 +164,8 @@ public class ColorUtility {
                 line = "\"(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")\"\n";
                 bw.append(line);
             }
+            bw.flush();
+            fw.flush();
             bw.close();
             fw.close();
 
@@ -284,7 +292,7 @@ public class ColorUtility {
             BufferedReader br = new BufferedReader(new FileReader(new File(file)));
             String line = br.readLine();
             while ((line = br.readLine()) != null) {
-                line = line.replaceAll("(", "").replaceAll(")", "");
+                line = line.replace("(", "").replace(")", "").replaceAll("\"", "");
                 int red = Integer.valueOf(line.split(",")[0]);
                 int green = Integer.valueOf(line.split(",")[1]);
                 int blue = Integer.valueOf(line.split(",")[2]);

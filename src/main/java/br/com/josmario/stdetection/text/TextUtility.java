@@ -202,7 +202,6 @@ public class TextUtility {
             File out = new File(target);
 
             try {
-
                 FileWriter fw = new FileWriter(out);
                 BufferedWriter bw = new BufferedWriter(fw);
                 bw.append("\"term\", \"relative_frequency\"\n");
@@ -210,7 +209,13 @@ public class TextUtility {
                     String line = "\"" + term + "\", \"" + freq.get(term) + "\"\n";
                     bw.append(line);
                 }
+
+                bw.flush();
+                fw.flush();
+                bw.close();
+                fw.close();
             } catch (IOException e) {
+
             }
         } else {
 

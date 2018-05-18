@@ -63,10 +63,10 @@ public class Manager {
         } else {
             // System.out.println("Please, provide a valid text file.");
 
-//            Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
+//            Database.getInstance().loadUrls("/home/josmario/stm.txt");
 //            Manager.getInstance().generateDictionary();
-            //    Manager.getInstance().createDatabase();
-            Manager.getInstance().calculateBias();
+                Manager.getInstance().createDatabase();
+//            Manager.getInstance().calculateBias();
 //        TextUtility.getInstance().getBias(base, sample)
         }
 
@@ -74,7 +74,7 @@ public class Manager {
 //        Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
 //        Manager.getInstance().generateDictionary();
         //   Manager.getInstance().createDatabase();
-//        Manager.getInstance().calculateBias();
+        Manager.getInstance().calculateBias();
 //        TextUtility.getInstance().getBias(base, sample)
     }
 
@@ -106,9 +106,9 @@ public class Manager {
         String line;
 
         try (BufferedReader br = new BufferedReader(new FileReader(BASE_DIR + dictionary))) {
-            br.readLine();
+//            br.readLine();
             while ((line = br.readLine()) != null) {
-                line = line.replace("\"", "");
+//                line = line.replace("\"", "");
                 String[] data = line.split(",");
                 String url = data[0];
                 String id = data[1];
@@ -122,13 +122,13 @@ public class Manager {
                 String sampleCsv = BASE_DIR + id + "/sample.csv";
 
                 System.out.println("Storing word frequencies...");
-                TextUtility.getInstance().storeFrequency(url, frequency);
+//                TextUtility.getInstance().storeFrequency(url, frequency);
 
-                System.out.println("Saving screenshot...");
+//                System.out.println("Saving screenshot...");
                 //  ColorUtility.getInstance().saveImage(url, screenshot);
 
-                System.out.println("Saving sample...");
-                //  ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+//                System.out.println("Saving sample...");
+//                  ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
             }
 
         } catch (IOException e) {

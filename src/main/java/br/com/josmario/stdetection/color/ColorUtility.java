@@ -288,19 +288,33 @@ public class ColorUtility {
 
     private List<Color> readSample(String file) {
         List<Color> colors = new ArrayList<>();
+        BufferedReader br = null;
         try {
-            BufferedReader br = new BufferedReader(new FileReader(new File(file)));
-            String line = br.readLine();
+            br = new BufferedReader(new FileReader(new File(file)));
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        String line;
+        try {
+            line = br.readLine();
+        } catch (IOException ex) {
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
             while ((line = br.readLine()) != null) {
-                line = line.replace("(", "").replace(")", "").replaceAll("\"", "");
-                int red = Integer.valueOf(line.split(",")[0]);
-                int green = Integer.valueOf(line.split(",")[1]);
-                int blue = Integer.valueOf(line.split(",")[2]);
-                colors.add(new Color(red, green, blue));
-                System.out.println("color: " + red + "," + green + "," + blue);
-
+                try {
+                    
+                    line = line.replace("(", "").replace(")", "").replaceAll("\"", "");
+                    int red = Integer.valueOf(line.split(",")[0]);
+                    int green = Integer.valueOf(line.split(",")[1]);
+                    int blue = Integer.valueOf(line.split(",")[2]);
+                    colors.add(new Color(red, green, blue));
+                    System.out.println("color: " + red + "," + green + "," + blue);
+                } catch (NumberFormatException ex) {
+                    Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
-        } catch (IOException | NumberFormatException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
 

@@ -293,6 +293,7 @@ public class ColorUtility {
             br = new BufferedReader(new FileReader(new File(file)));
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+            return new ArrayList<>();
         }
         String line;
         try {
@@ -303,13 +304,17 @@ public class ColorUtility {
         try {
             while ((line = br.readLine()) != null) {
                 try {
-                    
+
                     line = line.replace("(", "").replace(")", "").replaceAll("\"", "");
                     int red = Integer.valueOf(line.split(",")[0]);
                     int green = Integer.valueOf(line.split(",")[1]);
                     int blue = Integer.valueOf(line.split(",")[2]);
+                    
+                    if(red>255 || green> 255 || blue>255){
+                        System.out.println("ALERT: "+ line);
+                    }
                     colors.add(new Color(red, green, blue));
-                    System.out.println("color: " + red + "," + green + "," + blue);
+
                 } catch (NumberFormatException ex) {
                     Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
                 }

@@ -99,6 +99,7 @@ public class TextUtility {
     public double getBias(Map<String, Double> base, Map<String, Double> sample) {
 
         if (base == null || sample == null) {
+            System.out.println("NULL ------------------<<<<<<<");
             return 0.0;
         }
 

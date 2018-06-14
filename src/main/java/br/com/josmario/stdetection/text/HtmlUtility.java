@@ -54,7 +54,16 @@ public class HtmlUtility {
     public Document getPageDocument(String url) {
         Document page = null;
         try {
-            page = Jsoup.parse(new URL(url), 1000);
+            page = Jsoup.parseBodyFragment(
+                    Jsoup.connect(url)
+                            .userAgent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.79 Safari/537.36")
+                            .timeout(1000)
+                            .get()
+                            .body()
+                            .html()
+            );
+
+//            page = Jsoup.parse(new URL(url), 1000);
             //page = Jsoup.connect(url).get();
         } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);

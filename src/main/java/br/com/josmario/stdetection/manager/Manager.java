@@ -14,8 +14,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,7 +76,7 @@ public class Manager {
 //        Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
 //        Manager.getInstance().generateDictionary();
         //   Manager.getInstance().createDatabase();
-        Manager.getInstance().calculateBias();
+//        Manager.getInstance().calculateBias();
 //        TextUtility.getInstance().getBias(base, sample)
     }
 
@@ -122,13 +124,18 @@ public class Manager {
                 String sampleCsv = BASE_DIR + id + "/sample.csv";
 
                 System.out.println("Storing word frequencies...");
-//                TextUtility.getInstance().storeFrequency(url, frequency);
+                
+                if(!new File(frequency).exists()){
+                    System.out.println("file does not exist: "+ id);
+                    TextUtility.getInstance().storeFrequency(url, frequency);
+
+                }
+                //TextUtility.getInstance().storeFrequency(url, frequency);
 
 //                System.out.println("Saving screenshot...");
                 //  ColorUtility.getInstance().saveImage(url, screenshot);
-
 //                System.out.println("Saving sample...");
-//                  ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+                //ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
             }
 
         } catch (IOException e) {
@@ -139,15 +146,37 @@ public class Manager {
     public void calculateBias() {
 
         FilenameFilter filter = (File dir, String name) -> name.contains("-");
+        FileWriter fw = null;
+        try {
+            fw = new FileWriter(new File(BASE_DIR + "biasdata.csv"));
+        } catch (IOException ex) {
+            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         for (String dir : new File(BASE_DIR).list(filter)) {
 
-            System.out.println("================> " + dir + " <================");
+            try {
+                System.out.println("================> " + dir + " <================");
 
-            Double[] textBias = getWordListBias(dir + "/freq.csv");
-            Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR+ dir + "/screenshot.png");
-            System.out.println("Text Bias: " + Arrays.toString(textBias));
-            System.out.println("Color Bias: " + Arrays.toString(colorBias));
+                Double[] textBias = getWordListBias(dir + "/freq.csv");
+                Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR + dir + "/sample.csv");
+
+                DecimalFormat df = new DecimalFormat("#.######");
+                df.setRoundingMode(RoundingMode.CEILING);
+
+                String line = "\""+df.format(colorBias[0]) + "\",\"" + df.format(colorBias[1]) + "\",\"" + df.format(textBias[0]) + "\",\"" + df.format(textBias[1]) + "\",\n";
+                System.out.println("LINE:" + line);
+                fw.append(line);
+            } catch (IOException ex) {
+                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        try {
+            fw.flush();
+            fw.close();
+        } catch (IOException ex) {
+
         }
     }
 
@@ -167,7 +196,7 @@ public class Manager {
 
         decision = stScore < 0.5 ? decision : 0.0;
 
-        Double[] st = {mScore, fScore, stScore, decision};
+        Double[] st = {fScore, mScore, stScore, decision};
         return st;
 
     }

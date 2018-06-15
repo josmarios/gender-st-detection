@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,9 +66,13 @@ public class Manager {
         } else {
             // System.out.println("Please, provide a valid text file.");
 
-//            Database.getInstance().loadUrls("/home/josmario/stm.txt");
-//            Manager.getInstance().generateDictionary();
-                Manager.getInstance().createDatabase();
+            while (true) {
+                Manager.getInstance().showMenu();
+
+            }
+
+//           
+//            
 //            Manager.getInstance().calculateBias();
 //        TextUtility.getInstance().getBias(base, sample)
         }
@@ -78,6 +83,38 @@ public class Manager {
         //   Manager.getInstance().createDatabase();
 //        Manager.getInstance().calculateBias();
 //        TextUtility.getInstance().getBias(base, sample)
+    }
+
+    private void showMenu() {
+        
+        System.out.println(""
+                + "\n---------------------\n"
+                + "0-Exit\n"
+                + "1-Load URLs\n"
+                + "2-Generate Dictionary\n"
+                + "3-Create Database\n"
+                + "4-Calculate Bias");
+
+        Scanner sc = new Scanner(System.in);
+        int exit = sc.nextInt();
+
+        //show menu
+        switch (exit) {
+            case 1:
+                Database.getInstance().loadUrls("/home/josmario/stf.txt");
+                break;
+            case 2:
+                Manager.getInstance().generateDictionary();
+                break;
+            case 3:
+                Manager.getInstance().createDatabase();
+                break;
+            case 4:
+                Manager.getInstance().calculateBias();
+                break;
+            default:
+                System.exit(0);
+        }
     }
 
     public void generateDictionary() {
@@ -91,7 +128,7 @@ public class Manager {
 
             for (String url : Database.getInstance().getUrls()) {
 
-                line = "\"" + url + "\",\"" + UUID.randomUUID().toString() + "\"\n";
+                line = url + "," + UUID.randomUUID().toString() + "\n";
                 bw.append(line);
                 System.out.println(line);
             }
@@ -108,9 +145,7 @@ public class Manager {
         String line;
 
         try (BufferedReader br = new BufferedReader(new FileReader(BASE_DIR + dictionary))) {
-//            br.readLine();
             while ((line = br.readLine()) != null) {
-//                line = line.replace("\"", "");
                 String[] data = line.split(",");
                 String url = data[0];
                 String id = data[1];
@@ -123,24 +158,24 @@ public class Manager {
                 String sampleImg = BASE_DIR + id + "/sample.png";
                 String sampleCsv = BASE_DIR + id + "/sample.csv";
 
-                System.out.println("Storing word frequencies...");
-                
-                if(!new File(frequency).exists()){
-                    System.out.println("file does not exist: "+ id);
+                if (!new File(frequency).exists()) {
+                    System.out.println("Storing word frequencies...");
                     TextUtility.getInstance().storeFrequency(url, frequency);
-
                 }
-                //TextUtility.getInstance().storeFrequency(url, frequency);
 
-//                System.out.println("Saving screenshot...");
-                //  ColorUtility.getInstance().saveImage(url, screenshot);
-//                System.out.println("Saving sample...");
-                //ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+                if (!new File(screenshot).exists()) {
+                    System.out.println("Saving screenshot...");
+                    ColorUtility.getInstance().saveImage(url, screenshot);
+                }
+
+                if (!new File(sampleImg).exists()) {
+                    System.out.println("Saving sample...");
+                    ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+                }
             }
 
         } catch (IOException e) {
         }
-
     }
 
     public void calculateBias() {
@@ -164,7 +199,7 @@ public class Manager {
                 DecimalFormat df = new DecimalFormat("#.######");
                 df.setRoundingMode(RoundingMode.CEILING);
 
-                String line = "\""+df.format(colorBias[0]) + "\",\"" + df.format(colorBias[1]) + "\",\"" + df.format(textBias[0]) + "\",\"" + df.format(textBias[1]) + "\",\n";
+                String line = "\"" + df.format(colorBias[0]) + "\",\"" + df.format(colorBias[1]) + "\",\"" + df.format(textBias[0]) + "\",\"" + df.format(textBias[1]) + "\",\n";
                 System.out.println("LINE:" + line);
                 fw.append(line);
             } catch (IOException ex) {

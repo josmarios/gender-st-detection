@@ -25,8 +25,7 @@ public class Database {
     private final List<String> urls = new ArrayList<>();
 
     private Database() {
-        urls.add("http://www.ufal.edu.br");
-        urls.add("https://www.mec.gov.br/");
+
     }
 
     public static Database getInstance() {
@@ -41,7 +40,7 @@ public class Database {
     }
 
     public void loadUrls(String filename) {
-
+        System.out.println("LOADING URLs:");
         this.urls.clear();
 
         try {
@@ -50,6 +49,7 @@ public class Database {
             String line;
             while ((line = br.readLine()) != null) {
                 this.urls.add(line);
+                System.out.println(line);
             }
 
         } catch (FileNotFoundException ex) {

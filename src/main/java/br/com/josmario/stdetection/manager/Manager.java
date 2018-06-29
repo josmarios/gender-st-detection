@@ -18,10 +18,12 @@ import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
@@ -41,6 +43,7 @@ public class Manager {
 
     private static Manager instance;
     private final String BASE_DIR;
+    private final String URLS_FILE = "/home/josmario/universities.txt";
 
     private Manager() {
         BASE_DIR = System.getProperty("user.home") + "/database/";
@@ -64,29 +67,16 @@ public class Manager {
             String decision = score[3] != 0 ? genderMessage : neutralMessage;
             System.out.println("Overall Decision: " + decision + " stereotype.");
         } else {
-            // System.out.println("Please, provide a valid text file.");
 
             while (true) {
                 Manager.getInstance().showMenu();
 
             }
-
-//           
-//            
-//            Manager.getInstance().calculateBias();
-//        TextUtility.getInstance().getBias(base, sample)
         }
-
-//        System.out.println("");
-//        Database.getInstance().loadUrls("/home/josmario/repositories/st-detection/urls.txt");
-//        Manager.getInstance().generateDictionary();
-        //   Manager.getInstance().createDatabase();
-//        Manager.getInstance().calculateBias();
-//        TextUtility.getInstance().getBias(base, sample)
     }
 
     private void showMenu() {
-        
+
         System.out.println(""
                 + "\n---------------------\n"
                 + "0-Exit\n"
@@ -101,7 +91,7 @@ public class Manager {
         //show menu
         switch (exit) {
             case 1:
-                Database.getInstance().loadUrls("/home/josmario/stf.txt");
+                Database.getInstance().loadUrls(URLS_FILE);
                 break;
             case 2:
                 Manager.getInstance().generateDictionary();
@@ -110,7 +100,7 @@ public class Manager {
                 Manager.getInstance().createDatabase();
                 break;
             case 4:
-                Manager.getInstance().calculateBias();
+                Manager.getInstance().calculateBias(1);
                 break;
             default:
                 System.exit(0);
@@ -178,7 +168,7 @@ public class Manager {
         }
     }
 
-    public void calculateBias() {
+    public void calculateBias(int gender) {
 
         FilenameFilter filter = (File dir, String name) -> name.contains("-");
         FileWriter fw = null;
@@ -196,11 +186,15 @@ public class Manager {
                 Double[] textBias = getWordListBias(dir + "/freq.csv");
                 Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR + dir + "/sample.csv");
 
-                DecimalFormat df = new DecimalFormat("#.######");
+                NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+                DecimalFormat df = (DecimalFormat) nf;
+                df.applyPattern("##.######");
+//                DecimalFormat df = new DecimalFormat("#.######");
                 df.setRoundingMode(RoundingMode.CEILING);
 
-                String line = "\"" + df.format(colorBias[0]) + "\",\"" + df.format(colorBias[1]) + "\",\"" + df.format(textBias[0]) + "\",\"" + df.format(textBias[1]) + "\",\n";
-                System.out.println("LINE:" + line);
+                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
+                System.out.println("color-f, color-m, text-f, text-m, gender(0-f, 1-m)");
+                System.out.println(line);
                 fw.append(line);
             } catch (IOException ex) {
                 Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);

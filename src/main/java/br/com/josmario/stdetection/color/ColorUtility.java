@@ -87,15 +87,6 @@ public class ColorUtility {
         }
     }
 
-//    private void saveImage(String sourceUrl, String filepath) {
-//        try {
-//            GrabzItClient grabzIt = new GrabzItClient("ZWYxZWQxYTA4NWU2NDdhYjk4NDI5ODYwY2VlYTQyMGM=", "PzM/DQ0/RF4/P3g/Sjg/Oz8CPD8/VE8jQW4/dHkJLHc=");
-//            grabzIt.URLToImage(sourceUrl);
-//            grabzIt.SaveTo(filepath);
-//        } catch (Exception ex) {
-//            Logger.getLogger(StColor.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
     public void saveImage(String sourceUrl, String filepath) {
         try {
 

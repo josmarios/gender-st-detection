@@ -136,31 +136,34 @@ public class Manager {
 
         try (BufferedReader br = new BufferedReader(new FileReader(BASE_DIR + dictionary))) {
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                String url = data[0];
-                String id = data[1];
+                try {
+                    String[] data = line.split(",");
+                    String url = data[0];
+                    String id = data[1];
 
-                System.out.println("\n========================> [" + url + "] <========================");
-                new File(BASE_DIR + id).mkdirs();
+                    System.out.println("\n========================> [" + url + "] <========================");
+                    new File(BASE_DIR + id).mkdirs();
 
-                String frequency = BASE_DIR + id + "/freq.csv";
-                String screenshot = BASE_DIR + id + "/screenshot.png";
-                String sampleImg = BASE_DIR + id + "/sample.png";
-                String sampleCsv = BASE_DIR + id + "/sample.csv";
+                    String frequency = BASE_DIR + id + "/freq.csv";
+                    String screenshot = BASE_DIR + id + "/screenshot.png";
+                    String sampleImg = BASE_DIR + id + "/sample.png";
+                    String sampleCsv = BASE_DIR + id + "/sample.csv";
 
-                if (!new File(frequency).exists()) {
-                    System.out.println("Storing word frequencies...");
-                    TextUtility.getInstance().storeFrequency(url, frequency);
-                }
+                    if (!new File(frequency).exists()) {
+                        System.out.println("Storing word frequencies...");
+                        TextUtility.getInstance().storeFrequency(url, frequency);
+                    }
 
-                if (!new File(screenshot).exists()) {
-                    System.out.println("Saving screenshot...");
-                    ColorUtility.getInstance().saveImage(url, screenshot);
-                }
+                    if (!new File(screenshot).exists()) {
+                        System.out.println("Saving screenshot...");
+                        ColorUtility.getInstance().saveImage(url, screenshot);
+                    }
 
-                if (!new File(sampleImg).exists()) {
-                    System.out.println("Saving sample...");
-                    ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+                    if (!new File(sampleImg).exists()) {
+                        System.out.println("Saving sample...");
+                        ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+                    }
+                } catch (Exception e) {
                 }
             }
 

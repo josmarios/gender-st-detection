@@ -5,6 +5,7 @@
  */
 package br.com.josmario.stdetection.color;
 
+import com.clearspring.analytics.util.Varint;
 import it.grabz.grabzit.GrabzItClient;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -91,7 +92,7 @@ public class ColorUtility {
         try {
 
             Process p = Runtime.getRuntime().exec("firefox -headless -screenshot " + filepath + " " + sourceUrl);
-            p.waitFor(10, TimeUnit.SECONDS);
+            p.waitFor(30, TimeUnit.SECONDS);
 
             if (p.isAlive()) {
                 p.destroyForcibly();
@@ -121,7 +122,6 @@ public class ColorUtility {
                 Integer randH = (int) (Math.random() * h);
 
                 Color c = new Color(bufferedImage.getRGB(randW, randH));
-
                 int temp = c.getRed() + c.getGreen() + c.getBlue();
                 if (temp == 0 || temp == 765) {
                     this.SAMPLE[randW][randH] = 0;
@@ -219,10 +219,28 @@ public class ColorUtility {
         int redB = b.getRed();
         int greenB = b.getGreen();
         int blueB = b.getBlue();
+//
+//        sim = (numSim(redA, redB, 255) + numSim(greenA, greenB, 255) + numSim(blueA, blueB, 255)) / 3.0;
 
-        sim = (numSim(redA, redB, 255) + numSim(greenA, greenB, 255) + numSim(blueA, blueB, 255)) / 3.0;
+        //converts RGB colors into Y'UV
+        double wR = 0.299;
+        double wB = 0.114;
+        double wG = 1 - wR - wB;
+        double uMax = 0.436;
+        double vMax = 0.615;
 
-        return sim;
+        double yA = wR * redA + wG * greenA + wB * blueA;
+        double uA = uMax * ((greenA - yA) / (1 - wB));
+        double vA = vMax * ((redA - yA) / (1 - wR));
+
+        double yB = wR * redB + wG * greenB + wB * blueB;
+        double uB = uMax * ((greenB - yA) / (1 - wB));
+        double vB = vMax * ((redB - yA) / (1 - wR));
+
+        double vectorA[] = {yA, uA, vA};
+        double vectorB[] = {yB, uB, vB};
+
+        return cosineSimilarity(vectorA, vectorB);
     }
 
     /**
@@ -266,6 +284,10 @@ public class ColorUtility {
             model.put(tempColor, model.get(tempColor) + increment);
         }
 
+        double max = 0.0;
+        for (Color c : baseModel) {
+
+        }
         //normalization
         for (Color c : baseModel) {
             Double temp = model.get(c);
@@ -300,9 +322,9 @@ public class ColorUtility {
                     int red = Integer.valueOf(line.split(",")[0]);
                     int green = Integer.valueOf(line.split(",")[1]);
                     int blue = Integer.valueOf(line.split(",")[2]);
-                    
-                    if(red>255 || green> 255 || blue>255){
-                        System.out.println("ALERT: "+ line);
+
+                    if (red > 255 || green > 255 || blue > 255) {
+                        System.out.println("ALERT: " + line);
                     }
                     colors.add(new Color(red, green, blue));
 

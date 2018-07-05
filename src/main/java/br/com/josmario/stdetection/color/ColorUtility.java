@@ -5,14 +5,8 @@
  */
 package br.com.josmario.stdetection.color;
 
-import com.clearspring.analytics.util.Varint;
-import it.grabz.grabzit.GrabzItClient;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.RenderingHints;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -26,16 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.util.Pair;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 /**
  *
@@ -50,14 +39,16 @@ public class ColorUtility {
     private Integer HEIGHT;
 
     private final int SAMPLE_SIZE = 3000;
-    private final Color[] ST_COLORS = {
-        //female
+
+    private final Color[] ST_COLORS_F = {
         new Color(250, 70, 130),
         new Color(230, 75, 150),
         new Color(212, 80, 155),
         new Color(190, 90, 170),
-        new Color(180, 90, 180),
-        //male
+        new Color(180, 90, 180)
+    };
+
+    private final Color[] ST_COLORS_M = {
         new Color(100, 120, 235),
         new Color(80, 120, 245),
         new Color(70, 125, 250),
@@ -145,20 +136,19 @@ public class ColorUtility {
 
             ImageIO.write(bufferedImage, "PNG", new File(outImage));
 
-            //saves colors to csv
-            FileWriter fw = new FileWriter(outCsv);
-            BufferedWriter bw = new BufferedWriter(fw);
+            try (
+                    FileWriter fw = new FileWriter(outCsv);
+                    BufferedWriter bw = new BufferedWriter(fw)) {
 
-            String line = "\"color\"\n";
-            bw.append(line);
-            for (Color color : colors) {
-                line = "\"(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")\"\n";
+                String line = "\"color\"\n";
                 bw.append(line);
+                for (Color color : colors) {
+                    line = "\"(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + ")\"\n";
+                    bw.append(line);
+                }
+                bw.flush();
+                fw.flush();
             }
-            bw.flush();
-            fw.flush();
-            bw.close();
-            fw.close();
 
         } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
@@ -210,7 +200,6 @@ public class ColorUtility {
      * @return Score ranging from 0.0 to 1.0
      */
     private double colorSimilarity(Color a, Color b) {
-        double sim = 0.0;
 
         int redA = a.getRed();
         int greenA = a.getGreen();
@@ -266,36 +255,16 @@ public class ColorUtility {
 
         Map<Color, Double> model = new HashMap<>();
 
-        for (Color color : baseModel) {
-            model.put(color, 0.0);
-        }
-
         for (Color c : sample) {
-            Color tempColor = null;
             Double maxSim = 0.0;
             for (Color baseColor : baseModel) {
                 Double sim = colorSimilarity(c, baseColor);
-                if (sim > maxSim) {
-                    maxSim = sim;
-                    tempColor = baseColor;
-                }
+                maxSim = sim > maxSim ? sim : maxSim;
             }
-            Double increment = maxSim > 0.6 ? 1.0 : 0.0;
-            model.put(tempColor, model.get(tempColor) + increment);
+            //Normalized maxSim. Notice that 0<SUM(maxSim_i)<SAMPLE_SIZE
+            model.put(c, maxSim / new Double(SAMPLE_SIZE));
         }
 
-        double max = 0.0;
-        for (Color c : baseModel) {
-
-        }
-        //normalization
-        for (Color c : baseModel) {
-            Double temp = model.get(c);
-            Double norm = temp / SAMPLE_SIZE;
-
-            model.remove(c);
-            model.put(c, norm);
-        }
         return model;
     }
 
@@ -310,7 +279,7 @@ public class ColorUtility {
         }
         String line;
         try {
-            line = br.readLine();
+            br.readLine();
         } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -342,36 +311,25 @@ public class ColorUtility {
     /**
      * Stereotype estimation based on colors
      *
-     * @param url URL to a Web Page
+     * @param file Samples
      * @return Score for each stereotype [st-female, st-male]
      */
     public Double[] getBias(String file) {
 
-//            String filename = UUID.randomUUID().toString();
-//            String file = "/home/josmario/temp/page-imgs/" + filename + ".jpg";
-////            this.saveImage(url, file);
-//            this.saveImage(url, file);
         List<Color> sample = this.readSample(file);
-        Map<Color, Double> stModel = this.computeModel(ST_COLORS, sample);
+        Map<Color, Double> fModel = this.computeModel(ST_COLORS_F, sample);
+        Map<Color, Double> mModel = this.computeModel(ST_COLORS_M, sample);
 
-        List<Double> m = new ArrayList<>();
+        Double fSum = 0.0, mSum = 0.0;
 
-        stModel.values().stream().forEach((value) -> {
-            m.add(value);
-        });
+        fSum = fModel.values().stream().map((value) -> value).reduce(fSum, (accumulator, _item) -> accumulator + _item);
+        mSum = mModel.values().stream().map((value) -> value).reduce(mSum, (accumulator, _item) -> accumulator + _item);
 
-        Double mScore = 0.0;
-        Double fScore = 0.0;
+        Double meanF, meanM;
+        meanF = fSum / new Double(fModel.size());
+        meanM = mSum / new Double(mModel.size());
 
-        for (int i = 0; i < (m.size() / 2); i++) {
-            fScore += m.get(i);
-        }
-
-        for (int i = (m.size() / 2); i < m.size(); i++) {
-            mScore += m.get(i);
-        }
-
-        Double[] scores = {fScore, mScore};
+        Double[] scores = {meanF, meanM};
         return scores;
 
     }

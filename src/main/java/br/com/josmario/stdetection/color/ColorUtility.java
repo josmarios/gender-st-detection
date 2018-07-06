@@ -129,14 +129,16 @@ public class ColorUtility {
                 Integer randH = (int) (Math.random() * h);
 
                 Color c = new Color(bufferedImage.getRGB(randW, randH));
-                int temp = c.getRed() + c.getGreen() + c.getBlue();
-                if (temp == 0 || temp == 765) {
-                    this.SAMPLE[randW][randH] = 0;
-
-                } else {
-                    this.SAMPLE[randW][randH] = 1;
-                    colors.add(c);
-                }
+//                int temp = c.getRed() + c.getGreen() + c.getBlue();
+//                if (temp == 0 || temp == 765) {
+//                    this.SAMPLE[randW][randH] = 0;
+//
+//                } else {
+//                    this.SAMPLE[randW][randH] = 1;
+//                    colors.add(c);
+//                }
+                this.SAMPLE[randW][randH] = 1;
+                colors.add(c);
             }
 
             Graphics graphics = bufferedImage.getGraphics();
@@ -224,8 +226,6 @@ public class ColorUtility {
         int redB = b.getRed();
         int greenB = b.getGreen();
         int blueB = b.getBlue();
-//
-//        sim = (numSim(redA, redB, 255) + numSim(greenA, greenB, 255) + numSim(blueA, blueB, 255)) / 3.0;
 
         //converts RGB colors into Y'UV
         double wR = 0.299;
@@ -245,7 +245,11 @@ public class ColorUtility {
         double vectorA[] = {yA, uA, vA};
         double vectorB[] = {yB, uB, vB};
 
-        return cosineSimilarity(vectorA, vectorB);
+        double sim = cosineSimilarity(vectorA, vectorB);
+
+        //normalization
+        double z = (sim + 1) / 2.0;
+        return z;
     }
 
     /**
@@ -253,7 +257,7 @@ public class ColorUtility {
      *
      * @param vectorA
      * @param vectorB
-     * @return Similarity ranging from 0.0 to 1.0
+     * @return Similarity ranging from -1.0 to 1.0
      */
     public double cosineSimilarity(double[] vectorA, double[] vectorB) {
         double dotProduct = 0.0;
@@ -267,18 +271,18 @@ public class ColorUtility {
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     }
 
-    private Map<Color, Double> computeModel(Color[] baseModel, List<Color> sample) {
+    private Map<Color, Double> computeModel(Color[] gradient, List<Color> sample) {
 
         Map<Color, Double> model = new HashMap<>();
 
         for (Color c : sample) {
             Double maxSim = 0.0;
-            for (Color baseColor : baseModel) {
+            for (Color baseColor : gradient) {
                 Double sim = colorSimilarity(c, baseColor);
                 maxSim = sim > maxSim ? sim : maxSim;
             }
             //Normalized maxSim. Notice that 0<SUM(maxSim_i)<SAMPLE_SIZE
-            model.put(c, maxSim / new Double(SAMPLE_SIZE));
+            model.put(c, maxSim / new Double(sample.size()));
         }
 
         return model;
@@ -362,22 +366,6 @@ public class ColorUtility {
                 }
             }
         }
-
         graphics.dispose();
-
-//        BufferedImage resized = new BufferedImage(800, 600, bufferedImage.getType());
-//        Graphics2D g = resized.createGraphics();
-//        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-//                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-//        g.drawImage(bufferedImage, 0, 0, 800, 600, 0, 0, bufferedImage.getWidth(),
-//                bufferedImage.getHeight(), null);
-//        g.dispose();
-//
-//        JFrame frame = new JFrame();
-//        frame.getContentPane().setLayout(new FlowLayout());
-//        frame.getContentPane().add(new JLabel(new ImageIcon(resized)));
-//        frame.pack();
-//        frame.setVisible(true);
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }

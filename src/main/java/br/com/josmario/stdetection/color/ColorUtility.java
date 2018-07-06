@@ -39,24 +39,13 @@ public class ColorUtility {
     private Integer HEIGHT;
 
     private final int SAMPLE_SIZE = 3000;
+    private final int GRADIENT_SIZE = 100;
 
-    private final Color[] ST_COLORS_F = {
-        new Color(250, 70, 130),
-        new Color(230, 75, 150),
-        new Color(212, 80, 155),
-        new Color(190, 90, 170),
-        new Color(180, 90, 180)
-    };
-
-    private final Color[] ST_COLORS_M = {
-        new Color(100, 120, 235),
-        new Color(80, 120, 245),
-        new Color(70, 125, 250),
-        new Color(50, 90, 255),
-        new Color(0, 90, 255)
-    };
+    private Color[] FEMALE_GRADIENT;
+    private Color[] MALE_GRADIENT;
 
     private ColorUtility() {
+        this.initGradients();
 
     }
 
@@ -65,6 +54,33 @@ public class ColorUtility {
             instance = new ColorUtility();
         }
         return instance;
+    }
+
+    private void initGradients() {
+        this.MALE_GRADIENT = loadGradient("/home/josmario/repositories/st-detection/blue-green-gradient.png");
+        this.FEMALE_GRADIENT = loadGradient("/home/josmario/repositories/st-detection/red-purple-gradient.png");
+    }
+
+    private Color[] loadGradient(String file) {
+        Color[] gradient = new Color[GRADIENT_SIZE];
+
+        try {
+            BufferedImage bufferedImage = ImageIO.read(new File(file));
+
+            int w = bufferedImage.getWidth();
+            int h = (int) bufferedImage.getHeight() / 2;
+            int increment = (int) w / GRADIENT_SIZE;
+
+            for (int i = 0, j = 0; j < GRADIENT_SIZE; i += increment, j++) {
+                Color sample = new Color(bufferedImage.getRGB(i, h));
+                System.out.println("(" + sample.getRed() + "," + sample.getGreen() + "," + sample.getBlue() + ")");
+                gradient[j] = sample;
+            }
+        } catch (IOException ex) {
+
+        }
+
+        return gradient;
     }
 
     private void initSample(int w, int h) {
@@ -317,8 +333,8 @@ public class ColorUtility {
     public Double[] getBias(String file) {
 
         List<Color> sample = this.readSample(file);
-        Map<Color, Double> fModel = this.computeModel(ST_COLORS_F, sample);
-        Map<Color, Double> mModel = this.computeModel(ST_COLORS_M, sample);
+        Map<Color, Double> fModel = this.computeModel(FEMALE_GRADIENT, sample);
+        Map<Color, Double> mModel = this.computeModel(MALE_GRADIENT, sample);
 
         Double fSum = 0.0, mSum = 0.0;
 

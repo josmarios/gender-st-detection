@@ -230,17 +230,17 @@ public class ColorUtility {
         //converts RGB colors into Y'UV
         double wR = 0.299;
         double wB = 0.114;
-        double wG = 1 - wR - wB;
+        double wG = 1.0 - wR - wB;
         double uMax = 0.436;
         double vMax = 0.615;
 
         double yA = wR * redA + wG * greenA + wB * blueA;
-        double uA = uMax * ((greenA - yA) / (1 - wB));
-        double vA = vMax * ((redA - yA) / (1 - wR));
+        double uA = uMax * ((greenA - yA) / (1.0 - wB));
+        double vA = vMax * ((redA - yA) / (1.0 - wR));
 
         double yB = wR * redB + wG * greenB + wB * blueB;
-        double uB = uMax * ((greenB - yA) / (1 - wB));
-        double vB = vMax * ((redB - yA) / (1 - wR));
+        double uB = uMax * ((greenB - yA) / (1.0 - wB));
+        double vB = vMax * ((redB - yA) / (1.0 - wR));
 
         double vectorA[] = {yA, uA, vA};
         double vectorB[] = {yB, uB, vB};
@@ -248,8 +248,8 @@ public class ColorUtility {
         double sim = cosineSimilarity(vectorA, vectorB);
 
         //normalization
-        double z = (sim + 1) / 2.0;
-        return z;
+        double z = (sim + 1.0) / 2.0;
+        return sim;
     }
 
     /**
@@ -260,15 +260,21 @@ public class ColorUtility {
      * @return Similarity ranging from -1.0 to 1.0
      */
     public double cosineSimilarity(double[] vectorA, double[] vectorB) {
-        double dotProduct = 0.0;
-        double normA = 0.0;
-        double normB = 0.0;
-        for (int i = 0; i < vectorA.length; i++) {
-            dotProduct += vectorA[i] * vectorB[i];
-            normA += Math.pow(vectorA[i], 2);
-            normB += Math.pow(vectorB[i], 2);
-        }
-        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+//        double dotProduct = 0.0;
+//        double normA = 0.0;
+//        double normB = 0.0;
+//        for (int i = 0; i < vectorA.length; i++) {
+//            dotProduct += vectorA[i] * vectorB[i];
+//            normA += Math.pow(vectorA[i], 2);
+//            normB += Math.pow(vectorB[i], 2);
+//        }
+//        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+
+        //euclidian distance 
+        double sim = 0.0;
+        sim = Math.sqrt(Math.pow(vectorA[0] - vectorB[0], 2) + Math.pow(vectorA[1] - vectorB[1], 2) + Math.pow(vectorA[2] - vectorB[2], 2));
+
+        return sim;
     }
 
     private Map<Color, Double> computeModel(Color[] gradient, List<Color> sample) {
@@ -276,13 +282,13 @@ public class ColorUtility {
         Map<Color, Double> model = new HashMap<>();
 
         for (Color c : sample) {
-            Double maxSim = 0.0;
+            Double minSim = Double.MAX_VALUE;
             for (Color baseColor : gradient) {
                 Double sim = colorSimilarity(c, baseColor);
-                maxSim = sim > maxSim ? sim : maxSim;
+                minSim = sim < minSim ? sim : minSim;
             }
             //Normalized maxSim. Notice that 0<SUM(maxSim_i)<SAMPLE_SIZE
-            model.put(c, maxSim / new Double(sample.size()));
+            model.put(c, minSim / new Double(sample.size()));
         }
 
         return model;

@@ -100,7 +100,7 @@ public class Manager {
                 Manager.getInstance().createDatabase();
                 break;
             case 4:
-                Manager.getInstance().calculateBias(0);
+                Manager.getInstance().calculateBias(1);
                 break;
             default:
                 System.exit(0);

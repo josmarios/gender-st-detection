@@ -8,6 +8,8 @@ package br.com.josmario.stdetection.text;
 import br.com.josmario.stdetection.color.ColorUtility;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -100,14 +102,30 @@ public class HtmlUtility {
                     .replaceAll("[\\s]+", "0")
                     .replaceAll("\\W", "");
 
+            List<String> dataset = this.getDataset();
+            
             for (String string : temp.split("0")) {
                 String s = string.toLowerCase();
-                if (s.length() > 2) {
+                if (s.length() > 2 && dataset.contains(s)) {
                     result.add(s);
                 }
             }
             return result;
         }
         return null;
+    }
+
+    private List<String> getDataset() {
+
+        try {
+            return Files.readAllLines(Paths.get("/home/josmario/repositories/st-detection/words-linux.txt"));
+        } catch (IOException ex) {
+            Logger.getLogger(HtmlUtility.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        new HtmlUtility().getDataset();
     }
 }

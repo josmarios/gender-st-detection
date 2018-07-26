@@ -187,7 +187,8 @@ public class Manager {
                 System.out.println("================> " + dir + " <================");
 
                 Double[] textBias = getWordListBias(dir + "/freq.csv");
-                Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR + dir + "/sample.csv");
+//                Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR + dir + "/sample.csv");
+                Double[] colorBias = ColorUtility.getInstance().getAverageColor(BASE_DIR + dir + "/sample.csv");
 
                 NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
                 DecimalFormat df = (DecimalFormat) nf;
@@ -195,8 +196,10 @@ public class Manager {
 //                DecimalFormat df = new DecimalFormat("#.######");
                 df.setRoundingMode(RoundingMode.CEILING);
 
-                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
-                System.out.println("color-f, color-m, text-f, text-m, gender(0-f, 1-m)");
+//                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
+//                System.out.println("color-f, color-m, text-f, text-m, gender(0-f, 1-m)");
+                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(colorBias[2]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
+                System.out.println("red, green, blue, text-f, text-m, gender(0-f, 1-m)");
                 System.out.println(line);
                 fw.append(line);
             } catch (IOException ex) {

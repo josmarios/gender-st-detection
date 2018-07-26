@@ -125,20 +125,20 @@ public class ColorUtility {
 
             for (int i = 0; i < SAMPLE_SIZE; i++) {
 
-                Integer randW = (int) (Math.random() * w);
-                Integer randH = (int) (Math.random() * h);
+                boolean flag = true;
+                while (flag) {
+                    Integer randW = (int) (Math.random() * w);
+                    Integer randH = (int) (Math.random() * h);
 
-                Color c = new Color(bufferedImage.getRGB(randW, randH));
-//                int temp = c.getRed() + c.getGreen() + c.getBlue();
-//                if (temp == 0 || temp == 765) {
-//                    this.SAMPLE[randW][randH] = 0;
-//
-//                } else {
-//                    this.SAMPLE[randW][randH] = 1;
-//                    colors.add(c);
-//                }
-                this.SAMPLE[randW][randH] = 1;
-                colors.add(c);
+                    Color c = new Color(bufferedImage.getRGB(randW, randH));
+                    int temp = c.getRed() + c.getGreen() + c.getBlue();
+                    if (temp > 30 && temp < 735) {
+                        this.SAMPLE[randW][randH] = 1;
+                        colors.add(c);
+                        flag = false;
+                    }
+                }
+//                this.SAMPLE[randW][randH] = 1;
             }
 
             Graphics graphics = bufferedImage.getGraphics();
@@ -358,6 +358,25 @@ public class ColorUtility {
         Double[] scores = {meanF, meanM};
         return scores;
 
+    }
+
+    public Double[] getAverageColor(String file) {
+        List<Color> sample = this.readSample(file);
+
+        double r = 0, g = 0, b = 0, meanR, meanG, meanB;
+
+        for (Color c : sample) {
+            r += c.getRed();
+            g += c.getGreen();
+            b += c.getBlue();
+        }
+
+        meanR = r / sample.size();
+        meanG = g / sample.size();
+        meanB = b / sample.size();
+
+        Double[] scores = {meanR / 255.0, meanG / 255.0, meanB / 255.0};
+        return scores;
     }
 
     public void printSample(BufferedImage bufferedImage, Integer[][] dots) {

@@ -100,7 +100,7 @@ public class Manager {
                 Manager.getInstance().createDatabase();
                 break;
             case 4:
-                Manager.getInstance().calculateBias(1);
+                Manager.getInstance().calculateBias(-1);
                 break;
             default:
                 System.exit(0);
@@ -198,7 +198,13 @@ public class Manager {
 
 //                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
 //                System.out.println("color-f, color-m, text-f, text-m, gender(0-f, 1-m)");
-                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(colorBias[2]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
+                String line = "";
+                if (gender == 1 || gender == 0) {
+
+                    line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(colorBias[2]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
+                } else {
+                    line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(colorBias[2]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "\n";
+                }
                 System.out.println("red, green, blue, text-f, text-m, gender(0-f, 1-m)");
                 System.out.println(line);
                 fw.append(line);

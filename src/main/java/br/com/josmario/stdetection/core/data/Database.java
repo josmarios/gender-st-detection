@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.data;
+package br.com.josmario.stdetection.core.data;
 
 import java.io.BufferedReader;
 import java.io.File;

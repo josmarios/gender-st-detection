@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.text;
+package br.com.josmario.stdetection.core.text;
 
-import br.com.josmario.stdetection.color.ColorUtility;
+import br.com.josmario.stdetection.core.color.ColorUtility;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;

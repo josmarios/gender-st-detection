@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.text;
+package br.com.josmario.stdetection.core.text;
 
-import br.com.josmario.stdetection.data.Database;
+import br.com.josmario.stdetection.core.data.Database;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;

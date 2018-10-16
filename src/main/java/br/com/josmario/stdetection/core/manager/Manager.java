@@ -1,9 +1,10 @@
-package br.com.josmario.stdetection.manager;
+package br.com.josmario.stdetection.core.manager;
 
-import br.com.josmario.stdetection.color.ColorUtility;
-import br.com.josmario.stdetection.data.Database;
-import br.com.josmario.stdetection.text.HtmlUtility;
-import br.com.josmario.stdetection.text.TextUtility;
+import br.com.josmario.stdetection.core.color.ColorUtility;
+import br.com.josmario.stdetection.core.data.Database;
+import br.com.josmario.stdetection.core.text.HtmlUtility;
+import br.com.josmario.stdetection.core.text.TextUtility;
+import br.com.josmario.stdetection.web.ResponseModel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -314,4 +315,37 @@ public class Manager {
         return data;
     }
 
+    public ResponseModel processUrl(String url) {
+
+        String id = UUID.randomUUID().toString();
+
+        File f = new File("/home/josmario/requests/" + id);
+        f.mkdirs();
+
+        String frequency = f.getAbsolutePath() + "/freq.csv";
+        String screenshot = f.getAbsolutePath() + "/screenshot.png";
+        String sampleImg = f.getAbsolutePath() + "/sample.png";
+        String sampleCsv = f.getAbsolutePath() + "/sample.csv";
+
+        TextUtility.getInstance().storeFrequency(url, frequency);
+        ColorUtility.getInstance().saveImage(url, screenshot);
+        ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
+
+        //calculates bias
+        Double[] textBias = getWordListBias(frequency);
+        Double[] colorBias = ColorUtility.getInstance().getAverageColor(sampleCsv);
+
+        ResponseModel response = new ResponseModel();
+        response.red = colorBias[0];
+        response.green = colorBias[1];
+        response.blue = colorBias[2];
+
+        response.textF = textBias[0];
+        response.textM = textBias[1];
+
+        response.decision = "GENDER";
+        response.url = url;
+
+        return response;
+    }
 }

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.face;
+package br.com.josmario.stdetection.core.face;
 
-import br.com.josmario.stdetection.text.HtmlUtility;
+import br.com.josmario.stdetection.core.text.HtmlUtility;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;

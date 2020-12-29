@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.core.color;
+package core;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -57,15 +57,15 @@ public class ColorUtility {
     }
 
     private void initGradients() {
-        this.MALE_GRADIENT = loadGradient("/home/josmario/repositories/st-detection/blue-green-gradient.png");
-        this.FEMALE_GRADIENT = loadGradient("/home/josmario/repositories/st-detection/red-purple-gradient.png");
+        this.MALE_GRADIENT = loadGradient("blue-green-gradient.png");
+        this.FEMALE_GRADIENT = loadGradient("red-purple-gradient.png");
     }
 
     private Color[] loadGradient(String file) {
         Color[] gradient = new Color[GRADIENT_SIZE];
 
         try {
-            BufferedImage bufferedImage = ImageIO.read(new File(file));
+            BufferedImage bufferedImage = ImageIO.read(Util.getInstance().getFileFromResourceAsStream(file));
 
             int w = bufferedImage.getWidth();
             int h = (int) bufferedImage.getHeight() / 2;
@@ -73,7 +73,6 @@ public class ColorUtility {
 
             for (int i = 0, j = 0; j < GRADIENT_SIZE; i += increment, j++) {
                 Color sample = new Color(bufferedImage.getRGB(i, h));
-                System.out.println("(" + sample.getRed() + "," + sample.getGreen() + "," + sample.getBlue() + ")");
                 gradient[j] = sample;
             }
         } catch (IOException ex) {
@@ -98,14 +97,29 @@ public class ColorUtility {
     public void saveImage(String sourceUrl, String filepath) {
         try {
 
-            Process p = Runtime.getRuntime().exec("firefox -headless -screenshot " + filepath + " " + sourceUrl);
-            p.waitFor(30, TimeUnit.SECONDS);
+            List<String> cmd = new ArrayList<>();
 
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("windows")) {
+                cmd.add("cmd");
+                cmd.add("/c");
+                cmd.add("C:\\Program Files\\Mozilla Firefox\\firefox.exe");
+            } else {
+                cmd.add("firefox");
+            }
+
+            cmd.add("--headless");
+            cmd.add("--screenshot");
+            cmd.add(filepath);
+            cmd.add(sourceUrl);
+
+            Logger.getGlobal().log(Level.INFO, "Trying to take a screenshot: {0}", String.join(" ", cmd));
+
+            Process p = new ProcessBuilder().command(cmd).start();
+            p.waitFor(10, TimeUnit.SECONDS);
             if (p.isAlive()) {
                 p.destroyForcibly();
             }
-
-            System.out.println("Waiting for screenshot to proceed...");
 
         } catch (IOException | InterruptedException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
@@ -114,7 +128,7 @@ public class ColorUtility {
 
     public void saveSample(String source, String outImage, String outCsv) {
         try {
-
+            System.out.println("SOURCE: " + source);
             List<Color> colors = new ArrayList<>();
             BufferedImage bufferedImage = ImageIO.read(new File(source));
 
@@ -169,7 +183,7 @@ public class ColorUtility {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, ex.getMessage(), ex);
         }
     }
 

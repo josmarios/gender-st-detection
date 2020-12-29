@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.core.text;
+package core;
 
-import br.com.josmario.stdetection.core.data.Database;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -35,23 +34,23 @@ public class TextUtility {
         return instance;
     }
 
-    public static void main(String[] args) {
-//        String input = args[0];
-//        String output = args[1];
+//    public static void main(String[] args) {
+////        String input = args[0];
+////        String output = args[1];
+////
+////        Database.getInstance().loadUrls(input);
+////
+////        for (String url : Database.getInstance().getUrls()) {
+////            System.out.println(HtmlUtility.getInstance().getPlainText(url));
+////        }
 //
-//        Database.getInstance().loadUrls(input);
+//        String source = "https://www.google.com";
 //
-//        for (String url : Database.getInstance().getUrls()) {
-//            System.out.println(HtmlUtility.getInstance().getPlainText(url));
+//        Map<String, Double> freqs = TextUtility.getInstance().getWordFrequency(HtmlUtility.getInstance().getWordList(source));
+//        for (String s : freqs.keySet()) {
+//            System.out.println(s + ":" + freqs.get(s) + "\n");
 //        }
-
-        String source = "https://www.google.com";
-
-        Map<String, Double> freqs = TextUtility.getInstance().getWordFrequency(HtmlUtility.getInstance().getWordList(source));
-        for (String s : freqs.keySet()) {
-            System.out.println(s + ":" + freqs.get(s) + "\n");
-        }
-    }
+//    }
 
     private Map<String, Double> normalize(Map<String, Double> values) {
 

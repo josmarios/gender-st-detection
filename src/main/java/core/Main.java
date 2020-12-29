@@ -1,32 +1,23 @@
-package br.com.josmario.stdetection.core.manager;
+package core;
 
-import br.com.josmario.stdetection.core.color.ColorUtility;
-import br.com.josmario.stdetection.core.data.Database;
-import br.com.josmario.stdetection.core.text.HtmlUtility;
-import br.com.josmario.stdetection.core.text.TextUtility;
-import br.com.josmario.stdetection.web.ResponseModel;
+import core.ColorUtility;
+import core.Util;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.RoundingMode;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,20 +31,18 @@ import java.util.logging.Logger;
  *
  * @author josmario
  */
-public class Manager {
+public class Main {
 
-    private static Manager instance;
-    private final String BASE_DIR;
-    private final String URLS_FILE = "/home/josmario/universities.txt";
+    private static Main instance;
+    private String BASE_DIR;
+    private String URLS_FILE;
 
-    private Manager() {
-        BASE_DIR = System.getProperty("user.home") + "/database/";
-        new File(BASE_DIR).mkdir();
+    private Main() {
     }
 
-    public static Manager getInstance() {
+    public static Main getInstance() {
         if (instance == null) {
-            instance = new Manager();
+            instance = new Main();
         }
         return instance;
     }
@@ -62,51 +51,29 @@ public class Manager {
 
         if (args.length > 0) {
             String input = args[0];
-            Double[] score = Manager.getInstance().getTextBias(input);
-            String genderMessage = score[0] > score[1] ? "MALE" : "FEMALE";
-            String neutralMessage = "No";
-            String decision = score[3] != 0 ? genderMessage : neutralMessage;
-            System.out.println("Overall Decision: " + decision + " stereotype.");
-        } else {
 
-            while (true) {
-                Manager.getInstance().showMenu();
+            System.out.println("input: " + input);
+            if (Files.isDirectory(Path.of(input))) {
+                System.out.println("Calculating bias");
+                Main.getInstance().BASE_DIR = input;
+                Main.getInstance().calculateBias(-1);
+            } else {
+
+                Main.getInstance().URLS_FILE = input;
+                Main.getInstance().BASE_DIR = new File(input).getParent() + "/";
+
+                Logger.getGlobal().log(Level.INFO, "Loading URLs from {0}", Main.getInstance().URLS_FILE);
+                Logger.getGlobal().log(Level.INFO, "Setting working directory to {0}", Main.getInstance().BASE_DIR);
+
+                Util.getInstance().loadUrls(Main.getInstance().URLS_FILE);
+                Main.getInstance().generateDictionary();
+                Main.getInstance().createDatabase();
 
             }
         }
     }
 
-    private void showMenu() {
 
-        System.out.println(""
-                + "\n---------------------\n"
-                + "0-Exit\n"
-                + "1-Load URLs\n"
-                + "2-Generate Dictionary\n"
-                + "3-Create Database\n"
-                + "4-Calculate Bias");
-
-        Scanner sc = new Scanner(System.in);
-        int exit = sc.nextInt();
-
-        //show menu
-        switch (exit) {
-            case 1:
-                Database.getInstance().loadUrls(URLS_FILE);
-                break;
-            case 2:
-                Manager.getInstance().generateDictionary();
-                break;
-            case 3:
-                Manager.getInstance().createDatabase();
-                break;
-            case 4:
-                Manager.getInstance().calculateBias(-1);
-                break;
-            default:
-                System.exit(0);
-        }
-    }
 
     public void generateDictionary() {
         try {
@@ -117,7 +84,7 @@ public class Manager {
             String line = "\"url\",\"id\"\n";
             bw.write(line);
 
-            for (String url : Database.getInstance().getUrls()) {
+            for (String url : Util.getInstance().getUrls()) {
 
                 line = url + "," + UUID.randomUUID().toString() + "\n";
                 bw.append(line);
@@ -126,7 +93,7 @@ public class Manager {
             bw.close();
             fw.close();
         } catch (IOException ex) {
-            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -178,8 +145,9 @@ public class Manager {
         FileWriter fw = null;
         try {
             fw = new FileWriter(new File(BASE_DIR + "biasdata.csv"));
+            fw.append("id, red, green, blue, text-f, text-m, color-f, color-m\n");
         } catch (IOException ex) {
-            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         for (String dir : new File(BASE_DIR).list(filter)) {
@@ -187,9 +155,12 @@ public class Manager {
             try {
                 System.out.println("================> " + dir + " <================");
 
+                //get url from dict
+//                String key = Files.readAllLines(Path.of(BASE_DIR + dir)).stream().filter(l -> l.contains(dir)).findFirst().get();
                 Double[] textBias = getWordListBias(dir + "/freq.csv");
 //                Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR + dir + "/sample.csv");
-                Double[] colorBias = ColorUtility.getInstance().getAverageColor(BASE_DIR + dir + "/sample.csv");
+                Double[] rgbMean = ColorUtility.getInstance().getAverageColor(BASE_DIR + dir + "/sample.csv");
+                Double[] colorBias = ColorUtility.getInstance().getBias(BASE_DIR + dir + "/sample.csv");
 
                 NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
                 DecimalFormat df = (DecimalFormat) nf;
@@ -200,17 +171,21 @@ public class Manager {
 //                String line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
 //                System.out.println("color-f, color-m, text-f, text-m, gender(0-f, 1-m)");
                 String line = "";
-                if (gender == 1 || gender == 0) {
 
-                    line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(colorBias[2]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "," + gender + "\n";
-                } else {
-                    line = df.format(colorBias[0]) + "," + df.format(colorBias[1]) + "," + df.format(colorBias[2]) + "," + df.format(textBias[0]) + "," + df.format(textBias[1]) + "\n";
-                }
-                System.out.println("red, green, blue, text-f, text-m, gender(0-f, 1-m)");
+                line = dir + ","
+                        + df.format(rgbMean[0]) + ","
+                        + df.format(rgbMean[1]) + ","
+                        + df.format(rgbMean[2]) + ","
+                        + df.format(textBias[0]) + ","
+                        + df.format(textBias[1]) + ","
+                        + df.format(colorBias[0]) + ","
+                        + df.format(colorBias[1]) + "\n";
+
+                System.out.println("id, red, green, blue, text-f, text-m, color-f, color-m");
                 System.out.println(line);
                 fw.append(line);
             } catch (IOException ex) {
-                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -250,7 +225,7 @@ public class Manager {
         Map<String, Double> stMale = readData("stMale.csv");
         Map<String, Double> stFemale = readData("stFemale.csv");
 
-        String text = this.readTextFile(file);
+        String text = Util.getInstance().readTextFile(file);
         Double mScore = TextUtility.getInstance().getBias(stMale, text);
         Double fScore = TextUtility.getInstance().getBias(stFemale, text);
         stScore = Math.abs(mScore - fScore);
@@ -262,24 +237,6 @@ public class Manager {
         Double[] st = {mScore, fScore, stScore, decision};
         return st;
 
-    }
-
-    private String readTextFile(String filename) {
-        String text = "";
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(new File(filename)));
-
-            String line = "";
-            while ((line = br.readLine()) != null) {
-                text += line + "\n";
-            }
-
-        } catch (FileNotFoundException ex) {
-            System.out.println("File not found: " + filename);
-        } catch (IOException ex) {
-            System.out.println("Error while reading '" + filename + "'.");
-        }
-        return text;
     }
 
     private Map<String, Double> readData(String filename) {
@@ -296,7 +253,7 @@ public class Manager {
                 }
 
             } catch (Exception ex) {
-                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
 
@@ -309,43 +266,9 @@ public class Manager {
                     data.put(word.toLowerCase(), value);
                 }
             } catch (Exception ex) {
-                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return data;
-    }
-
-    public ResponseModel processUrl(String url) {
-
-        String id = UUID.randomUUID().toString();
-
-        File f = new File("/home/josmario/requests/" + id);
-        f.mkdirs();
-
-        String frequency = f.getAbsolutePath() + "/freq.csv";
-        String screenshot = f.getAbsolutePath() + "/screenshot.png";
-        String sampleImg = f.getAbsolutePath() + "/sample.png";
-        String sampleCsv = f.getAbsolutePath() + "/sample.csv";
-
-        TextUtility.getInstance().storeFrequency(url, frequency);
-        ColorUtility.getInstance().saveImage(url, screenshot);
-        ColorUtility.getInstance().saveSample(screenshot, sampleImg, sampleCsv);
-
-        //calculates bias
-        Double[] textBias = getWordListBias(frequency);
-        Double[] colorBias = ColorUtility.getInstance().getAverageColor(sampleCsv);
-
-        ResponseModel response = new ResponseModel();
-        response.red = colorBias[0];
-        response.green = colorBias[1];
-        response.blue = colorBias[2];
-
-        response.textF = textBias[0];
-        response.textM = textBias[1];
-
-        response.decision = "GENDER";
-        response.url = url;
-
-        return response;
     }
 }

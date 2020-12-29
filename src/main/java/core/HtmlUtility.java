@@ -3,19 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package br.com.josmario.stdetection.core.text;
+package core;
 
-import br.com.josmario.stdetection.core.color.ColorUtility;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.apache.commons.io.*;
 
 /**
  *
@@ -42,7 +47,7 @@ public class HtmlUtility {
      * @return
      */
     public String getPage(String url) {
-        Document page = null;
+        Document page;
         try {
             page = Jsoup.parseBodyFragment(
                     Jsoup.connect(url)
@@ -52,7 +57,6 @@ public class HtmlUtility {
                             .body()
                             .html()
             );
-//            page = Jsoup.connect(url).timeout(10000).get();
         } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -72,9 +76,6 @@ public class HtmlUtility {
                             .body()
                             .html()
             );
-
-//            page = Jsoup.parse(new URL(url), 1000);
-            //page = Jsoup.connect(url).get();
         } catch (IOException ex) {
             Logger.getLogger(ColorUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -103,7 +104,7 @@ public class HtmlUtility {
                     .replaceAll("\\W", "");
 
             List<String> dataset = this.getDataset();
-            
+
             for (String string : temp.split("0")) {
                 String s = string.toLowerCase();
                 if (s.length() > 2 && dataset.contains(s)) {
@@ -116,16 +117,35 @@ public class HtmlUtility {
     }
 
     private List<String> getDataset() {
-
+        List<String> lines = new ArrayList<>();
         try {
-            return Files.readAllLines(Paths.get("/home/josmario/repositories/st-detection/words-linux.txt"));
+            InputStream inputStream = Util.getInstance().getFileFromResourceAsStream("words.txt");
+            lines = IOUtils.readLines(inputStream, "UTF-8");
+
         } catch (IOException ex) {
             Logger.getLogger(HtmlUtility.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return null;
+
+        return lines;
     }
 
-    public static void main(String[] args) {
-        new HtmlUtility().getDataset();
+    /**
+     * Lists images from a given web page
+     *
+     * @param pageUrl Page URL
+     */
+    public void getImages(String pageUrl) {
+        Document content = HtmlUtility.getInstance().getPageDocument(pageUrl);
+        Elements images = content.select("img");
+        images.forEach((Element element) -> {
+            try {
+                String currentUrl = element.absUrl("src");
+                URL url = new URL(currentUrl);
+                BufferedImage iosStream = ImageIO.read(url);
+                ImageIO.write(iosStream, "png", new File(UUID.randomUUID().toString() + ".png"));
+            } catch (IOException ex) {
+            }
+        });
     }
+
 }

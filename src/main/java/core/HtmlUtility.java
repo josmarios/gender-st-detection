@@ -83,25 +83,37 @@ public class HtmlUtility {
         return page;
     }
 
+    private String cleanTags(String html) {
+        String text = html
+                .replaceAll("</body>[\\w|\\W]+", "")
+                .split("<body\\b[^<]*>")[1]
+                .replaceAll("[\\s]*\\{.*?\\}", "")
+                .replaceAll("<script\\b[^<]*(?:(?!</script>)<[^<]*)*</script>", "")
+                .replaceAll("<[^>]*>", "")
+                .replaceAll("[\n]+", "XXXXXXX")
+                .replaceAll("[\\s]+", "ZZZZZZZZ")
+                .replaceAll("ZZZZZZZZ", " ")
+                .replaceAll("XXXXXXX", "\n")
+                .replaceAll("\n ", "\n")
+                .replaceAll("\n\n\n", "\n")
+                .replaceAll("(\n\n)", "\n");
+
+        return text;
+    }
+
     public List<String> getWordList(String url) {
         List<String> result = new ArrayList<>();
 
-        String pageContent = this.getPage(url);
+        String pageContent = this.getPage(url).replaceAll("\n", " ")
+                .replaceAll("  ", " ")
+                .replaceAll("[0-9]", "")
+                .replaceAll("[\\s]+", "0")
+                .replaceAll("\\W", "");
 
         if (pageContent != null) {
 
             System.out.println("Cleaning HTML tags...");
-            String temp = pageContent
-                    .replaceAll("</body>[\\w|\\W]+", "")
-                    .split("<body\\b[^<]*>")[1]
-                    .replaceAll("[\\s]*\\{.*?\\}", "")
-                    .replaceAll("<script\\b[^<]*(?:(?!</script>)<[^<]*)*</script>", "")
-                    .replaceAll("<[^>]*>", "")
-                    .replaceAll("\n", " ")
-                    .replaceAll("  ", " ")
-                    .replaceAll("[0-9]", "")
-                    .replaceAll("[\\s]+", "0")
-                    .replaceAll("\\W", "");
+            String temp = cleanTags(pageContent);
 
             List<String> dataset = this.getDataset();
 
@@ -114,6 +126,18 @@ public class HtmlUtility {
             return result;
         }
         return null;
+    }
+
+    public String getPageText(String url) {
+
+        String pageContent = this.getPage(url);
+
+        String result = (pageContent != null)
+                ? cleanTags(pageContent)
+                : "";
+
+        return result;
+
     }
 
     private List<String> getDataset() {
@@ -146,6 +170,11 @@ public class HtmlUtility {
             } catch (IOException ex) {
             }
         });
+    }
+
+    public static void main(String[] args) {
+        String url = "https://www.open.ac.uk";
+        System.out.println("===================================\n" + HtmlUtility.getInstance().getPageText(url));
     }
 
 }
